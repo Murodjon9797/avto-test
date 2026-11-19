@@ -373,9 +373,9 @@
     <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Premium</h2><small>Imtihon PRO</small></div><span></span></div>
     <div class="showcase"><div class="art" data-ic="crown"></div><h1 id="pwTitle">Premium'ga o'ting</h1><small id="pwSub"></small></div>
     <div class="card">
-      <div class="feat"><i>✓</i>1200 ta savolning barchasi</div>
+      <div class="feat"><i>✓</i>1370 ta savolning barchasi</div>
       <div class="feat"><i>✓</i>Cheksiz imtihon sinovlari va biletlar</div>
-      <div class="feat"><i>✓</i>30 ta animatsion yo'l vaziyati</div>
+      <div class="feat"><i>✓</i>200 ta animatsion yo'l vaziyati</div>
       <div class="feat"><i>✓</i>Xatolar tahlili va shaxsiy statistika</div>
       <div class="price"><b id="pwPrice"></b><small>Premium narxi</small></div>
     </div>
@@ -457,6 +457,10 @@
 <script src="q/f_signs.js"></script>
 <script src="q/g_safety.js"></script>
 <script src="scenes.js"></script>
+<script src="scenes/s1_junctions.js"></script>
+<script src="scenes/s2_lights.js"></script>
+<script src="scenes/s3_maneuvers.js"></script>
+<script src="scenes/s4_special.js"></script>
 <script>
 // ===== Sozlamalar =====
 // count — savollar soni, minutes — vaqt, maxErrors — ruxsat etilgan xatolar,
@@ -599,7 +603,7 @@ function applyPremiumUi() {
   $("proBadge").classList.toggle("on", PREMIUM);
   $("freeChip").textContent = PREMIUM ? "💎 Premium faol" : `🎁 Bepul: ${freeLeft()}/${PREMIUM_CFG.freeLimit} savol`;
   $("premCard").style.display = PREMIUM ? "none" : "";
-  $("premCardSub").textContent = `Barcha 1200 ta savol · ${PREMIUM_CFG.price}`;
+  $("premCardSub").textContent = `Barcha 1370 ta savol · ${PREMIUM_CFG.price}`;
   $("premRowSub").textContent = PREMIUM ? "Faol ✓" : PREMIUM_CFG.price;
 }
 function renderPaywall() {

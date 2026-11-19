@@ -151,11 +151,35 @@ const SCN = (() => {
   }
   // --- Piyoda (yuqoridan: yelka + bosh), yurganda chayqaladi
   function person(o) {
-    const c = o.color || "#ff7043";
-    return `<g>${motion(o, true)}<g><ellipse cx="1.5" cy="2" rx="4" ry="6.5" fill="#000" opacity=".22"/><ellipse rx="3.8" ry="6.2" fill="${c}" stroke="#00000055" stroke-width=".6"/><circle r="3.1" fill="#3e2723"/><animateTransform attributeName="transform" type="rotate" values="-8;8;-8" dur="0.7s" repeatCount="indefinite"/></g></g>`;
+    const c = o.color || "#ff7043", k = o.small ? 0.72 : 1;
+    const cane = o.cane ? `<line x1="4" y1="2" x2="15" y2="4" stroke="#fff" stroke-width="2"/><line x1="12" y1="3.5" x2="15" y2="4" stroke="#e53935" stroke-width="2"/>` : "";
+    return `<g>${motion(o, true)}<g transform="scale(${k})"><ellipse cx="1.5" cy="2" rx="4" ry="6.5" fill="#000" opacity=".22"/>${cane}<ellipse rx="3.8" ry="6.2" fill="${c}" stroke="#00000055" stroke-width=".6"/><circle r="3.1" fill="#3e2723"/><animateTransform attributeName="transform" type="rotate" values="-8;8;-8" dur="0.7s" repeatCount="indefinite" additive="sum"/></g></g>`;
   }
-  // --- Svetofor. state: green | red | yblink | g2y (yashildan sariqqa) | redarrow (qizil + o'ngga yashil strelka)
-  function light(x, y, state) {
+  // --- T-chorraha: g'arb-sharq yo'li (y 120..180) + janubiy tarmoq (x 120..180). Shimolda yo'l yo'q.
+  function tjunction(o = {}) {
+    let s = `<rect width="300" height="300" fill="url(#asph)"/>`;
+    s += `<rect x="-20" y="-20" width="340" height="140" fill="url(#tiles)" stroke="${CURB}" stroke-width="1.5"/><rect x="-20" y="-20" width="340" height="133" fill="url(#grass)"/>`;
+    for (const [x, y] of [[-20, 180], [180, 180]]) s += `<rect x="${x}" y="${y}" width="140" height="140" rx="18" fill="url(#tiles)" stroke="${CURB}" stroke-width="1.5"/>`;
+    s += `<rect x="-20" y="187" width="133" height="133" rx="12" fill="url(#grass)"/><rect x="187" y="187" width="133" height="133" rx="12" fill="url(#grass)"/>`;
+    s += house(20, 14, 80, 60, "roofB") + tree(130, 60, 16) + house(190, 18, 70, 56) + tree(282, 92, 11) + bush(110, 98);
+    s += tree(34, 246, 16) + house(54, 206, 44, 36) + house(236, 236, 56, 52) + tree(206, 278, 11);
+    s += dash(0, 150, 300, 150) + dash(150, 184, 150, 300);
+    if (o.stop) s += solid(150, 186, 180, 186, 3);
+    return s;
+  }
+  // --- Gorizontal zebra: vertikal yo'lni kesib o'tuvchi piyodalar o'tish joyi (piyodalar x bo'ylab yuradi)
+  function zebraH(x, y, w, h) {
+    let s = "";
+    for (let xx = x + 2; xx < x + w - 2; xx += 10) s += `<rect x="${xx}" y="${y}" width="6" height="${h}" rx="1" fill="#f4f4f4" opacity=".93"/>`;
+    return s;
+  }
+  // --- Svetofor. state: green | red | yellow | redyellow | off | yblink | g2y (yashil→sariq) | r2g (qizil→qizil+sariq→yashil)
+  //     | redarrow (qizil + o'ngga yashil strelka) | redleft (qizil + chapga yashil strelka). rot — burilish burchagi (gradus)
+  function light(x, y, state, rot = 0) {
+    const inner = lightInner(x, y, state);
+    return rot ? `<g transform="rotate(${rot} ${x + 7} ${y + 18})">${inner}</g>` : inner;
+  }
+  function lightInner(x, y, state) {
     const R = "#ff3b30", Y = "#ffcc00", G = "#34c759";
     const disc = (values, kt, dur = 4) => `<animate attributeName="fill" values="${values}" keyTimes="${kt}" dur="${dur}s" calcMode="discrete" repeatCount="indefinite"/>`;
     const glowAnim = (values, kt, dur = 4) => `<animate attributeName="opacity" values="${values}" keyTimes="${kt}" dur="${dur}s" calcMode="discrete" repeatCount="indefinite"/>`;
@@ -167,16 +191,32 @@ const SCN = (() => {
     if (state === "red") s += lens(7, R) + lens(18, OFF, "", "", false) + lens(29, OFF, "", "", false);
     if (state === "yblink") s += lens(7, OFF, "", "", false) + lens(18, Y, disc(`${Y};${OFF}`, "0;0.5", 1), glowAnim("0.35;0", "0;0.5", 1)) + lens(29, OFF, "", "", false);
     if (state === "g2y") s += lens(7, OFF, "", "", false) + lens(18, Y, disc(`${OFF};${Y}`, "0;0.3"), glowAnim("0;0.35", "0;0.3")) + lens(29, G, disc(`${G};${OFF}`, "0;0.3"), glowAnim("0.35;0", "0;0.3"));
-    if (state === "redarrow") {
+    if (state === "yellow") s += lens(7, OFF, "", "", false) + lens(18, Y) + lens(29, OFF, "", "", false);
+    if (state === "redyellow") s += lens(7, R) + lens(18, Y) + lens(29, OFF, "", "", false);
+    if (state === "off") s += lens(7, OFF, "", "", false) + lens(18, OFF, "", "", false) + lens(29, OFF, "", "", false);
+    if (state === "r2g") s += lens(7, R, disc(`${R};${R};${OFF}`, "0;0.35;0.55"), glowAnim("0.35;0.35;0", "0;0.35;0.55")) + lens(18, Y, disc(`${OFF};${Y};${OFF}`, "0;0.35;0.55"), glowAnim("0;0.35;0", "0;0.35;0.55")) + lens(29, G, disc(`${OFF};${G}`, "0;0.55"), glowAnim("0;0.35", "0;0.55"));
+    if (state === "redarrow" || state === "redleft") {
       s += lens(7, R) + lens(18, OFF, "", "", false) + lens(29, OFF, "", "", false);
-      s += `<rect x="${x + 14}" y="${y + 22}" width="15" height="14" rx="4" fill="url(#tlHouse)" stroke="#000" stroke-width=".6"/><circle cx="${x + 21.5}" cy="${y + 29}" r="7" fill="${G}" opacity=".3"/><text x="${x + 21.5}" y="${y + 33}" font-size="12" font-weight="900" fill="${G}" text-anchor="middle" font-family="Arial">→</text>`;
+      const left = state === "redleft", bx = left ? x - 15 : x + 14;
+      s += `<rect x="${bx}" y="${y + 22}" width="15" height="14" rx="4" fill="url(#tlHouse)" stroke="#000" stroke-width=".6"/><circle cx="${bx + 7.5}" cy="${y + 29}" r="7" fill="${G}" opacity=".3"/><text x="${bx + 7.5}" y="${y + 33}" font-size="12" font-weight="900" fill="${G}" text-anchor="middle" font-family="Arial">${left ? "←" : "→"}</text>`;
     }
     return s;
   }
-  function controller(x, y) { // tartibga soluvchi: qo'llari yon tomonga uzatilgan (ko'kragi janubga)
-    return `<g transform="translate(${x},${y})"><ellipse cx="3" cy="4" rx="24" ry="8" fill="#000" opacity=".2"/><line x1="-23" y1="0" x2="23" y2="0" stroke="#1e3a5f" stroke-width="4.5" stroke-linecap="round"/><circle cx="-23" cy="0" r="2.6" fill="#fff"/><circle cx="23" cy="0" r="2.6" fill="#fff"/><rect x="24" y="-1.6" width="13" height="3.2" rx="1" fill="#fff" stroke="#222" stroke-width=".5"/><rect x="27" y="-1.6" width="2.5" height="3.2" fill="#111"/><rect x="32" y="-1.6" width="2.5" height="3.2" fill="#111"/><ellipse rx="10" ry="6.8" fill="#264b74"/><ellipse rx="10" ry="6.8" fill="none" stroke="#c6ff00" stroke-width="1.4" stroke-dasharray="3 3"/><circle r="5" fill="#1b2f4a"/><circle r="3.4" fill="#f5f5f5"/><polygon points="-3,6.5 3,6.5 0,11" fill="#fdd835"/></g>`;
+  // --- Tartibga soluvchi (yuqoridan). pose: "side" — qo'llar yon tomonga; "up" — qo'l yuqoriga ko'tarilgan;
+  //     "forward" — o'ng qo'l oldinga uzatilgan. rot=0 da ko'kragi JANUBGA qaragan (sariq uchburchak ko'krak tomoni).
+  //     Burchak soat mili bo'yicha: rot=90 — ko'kragi g'arbga, rot=180 — shimolga, rot=270 — sharqqa.
+  function controller(x, y, pose = "side", rot = 0) {
+    const arm = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#1e3a5f" stroke-width="4.5" stroke-linecap="round"/><circle cx="${x2}" cy="${y2}" r="2.6" fill="#fff"/>`;
+    const baton = (bx, by, vertical) => vertical
+      ? `<rect x="${bx - 1.6}" y="${by}" width="3.2" height="13" rx="1" fill="#fff" stroke="#222" stroke-width=".5"/><rect x="${bx - 1.6}" y="${by + 3}" width="3.2" height="2.5" fill="#111"/><rect x="${bx - 1.6}" y="${by + 8}" width="3.2" height="2.5" fill="#111"/>`
+      : `<rect x="${bx - 13}" y="${by - 1.6}" width="13" height="3.2" rx="1" fill="#fff" stroke="#222" stroke-width=".5"/><rect x="${bx - 10}" y="${by - 1.6}" width="2.5" height="3.2" fill="#111"/><rect x="${bx - 5}" y="${by - 1.6}" width="2.5" height="3.2" fill="#111"/>`;
+    let arms = "";
+    if (pose === "side") arms = arm(-6, 0, -23, 0) + arm(6, 0, 23, 0) + baton(-24, 0, false);
+    if (pose === "forward") arms = arm(-6, 0, -6, 22) + arm(6, 0, 9, 7) + baton(-6, 23, true);
+    if (pose === "up") arms = arm(6, 0, 9, 7) + `<circle cx="-4" cy="-2" r="3.4" fill="#fff" stroke="#1e3a5f" stroke-width="1.2"/><g transform="translate(-14,-20)"><rect x="-9" y="-7" width="18" height="14" rx="4" fill="#fff" stroke="#00000040"/><text y="4" font-size="10" text-anchor="middle">✋</text></g>`;
+    return `<g transform="translate(${x},${y}) rotate(${rot})"><ellipse cx="3" cy="4" rx="24" ry="8" fill="#000" opacity=".2"/>${arms}<ellipse rx="10" ry="6.8" fill="#264b74"/><ellipse rx="10" ry="6.8" fill="none" stroke="#c6ff00" stroke-width="1.4" stroke-dasharray="3 3"/><circle r="5" fill="#1b2f4a"/><circle r="3.4" fill="#f5f5f5"/><polygon points="-3,6.5 3,6.5 0,11" fill="#fdd835"/></g>`;
   }
-  return { wrap, cross, straight, oneway3, zebra, sign, car, person, light, controller };
+  return { wrap, cross, tjunction, straight, oneway3, zebra, zebraH, sign, car, person, light, controller, tree, house, bush, dash, solid };
 })();
 
 // Animatsion savol qo'shish: id lar 5001 dan boshlanadi (tartibni o'zgartirmang)
