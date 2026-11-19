@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Avto Test</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f2ee; --card: #ffffff; --card2: #f7f6f3; --text: #17181a; --hint: #8a8d93; --line: #ecebe7;
+    --green: #1f6f47; --green-2: #2fbf71; --green-soft: #e4f4ea; --red: #e5484d; --red-soft: #fdecec;
+    --amber: #f5a524; --pink: #e0457b; --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+  }
+  [data-theme="dark"] {
+    --bg: #101211; --card: #1b1e1c; --card2: #232624; --text: #f1f2f1; --hint: #9a9e9b; --line: #2a2e2b;
+    --green: #35b26f; --green-2: #3fd082; --green-soft: #1a3325; --red: #f0646a; --red-soft: #3a1f21;
+    --shadow: none;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: 15px; line-height: 1.4; }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 16px 16px 110px; }
+  .screen { display: none; animation: fade .18s ease; }
+  .screen.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Sarlavhalar ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 18px; }
+  .big-title { font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--pink); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+  .bell { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; }
+  .top-right { display: flex; gap: 6px; align-items: center; }
+  .nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin: 4px 0 16px; }
+  .nav h2 { margin: 0; text-align: center; font-size: 17px; font-weight: 700; }
+  .nav small { display: block; text-align: center; color: var(--hint); font-size: 12px; font-weight: 500; }
+  .circle-btn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--card); box-shadow: var(--shadow); font-size: 18px; cursor: pointer; display: grid; place-items: center; }
+  .ring { width: 40px; height: 40px; justify-self: end; position: relative; }
+  .ring svg { width: 40px; height: 40px; transform: rotate(-90deg); }
+  .ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
+  .section-title { font-size: 15px; font-weight: 700; margin: 22px 2px 10px; }
+
+  /* ---------- Kartochkalar ---------- */
+  .card { background: var(--card); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .tile { background: var(--card); border-radius: 20px; padding: 14px; box-shadow: var(--shadow); border: 0; text-align: left; cursor: pointer; }
+  .tile .art { font-size: 52px; line-height: 1; text-align: center; margin: 4px 0 10px; filter: drop-shadow(0 6px 8px rgba(0,0,0,.15)); }
+  .tile b { display: block; font-size: 15px; text-align: center; margin-bottom: 8px; }
+  .meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--hint); margin-bottom: 5px; }
+  .bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--green-2); border-radius: 3px; transition: width .3s; }
+  .wide { display: flex; align-items: center; gap: 14px; width: 100%; background: var(--card); border: 0; border-radius: 20px; padding: 14px 16px; box-shadow: var(--shadow); text-align: left; cursor: pointer; margin-bottom: 12px; }
+  .wide .art { font-size: 40px; filter: drop-shadow(0 5px 6px rgba(0,0,0,.15)); }
+  .wide b { display: block; font-size: 15px; }
+  .wide small { color: var(--hint); font-size: 12px; }
+  .wide .chev { margin-left: auto; color: var(--hint); font-size: 20px; }
+  .list { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; padding: 13px 14px; text-align: left; cursor: pointer; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row .ico { width: 34px; height: 34px; border-radius: 10px; background: var(--card2); display: grid; place-items: center; font-size: 17px; flex: none; }
+  .row b { display: block; font-size: 14px; font-weight: 600; }
+  .row small { color: var(--hint); font-size: 12px; }
+  .row .chev { margin-left: auto; color: var(--hint); font-size: 18px; }
+  .row:active, .wide:active, .tile:active, .topic:active { transform: scale(.985); }
+
+  /* Kirish kartasi (bosh sahifa) */
+  .hero { background: var(--green); color: #fff; border-radius: 24px; padding: 18px; margin-bottom: 12px; position: relative; overflow: hidden; }
+  .hero h3 { margin: 0 0 4px; font-size: 20px; font-weight: 800; }
+  .hero p { margin: 0 0 14px; opacity: .85; font-size: 13px; }
+  .hero .art { position: absolute; right: 10px; top: 8px; font-size: 64px; filter: drop-shadow(0 8px 10px rgba(0,0,0,.25)); }
+  .hero button { border: 0; background: #fff; color: #1f6f47; font-weight: 700; border-radius: 14px; padding: 11px 18px; cursor: pointer; }
+  .ready { display: flex; align-items: center; gap: 16px; }
+  .ready .pct { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .ready small { color: var(--hint); }
+
+  /* Statistika plitkalari */
+  .stats4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .st { background: var(--card); border-radius: 16px; padding: 10px 6px; text-align: center; box-shadow: var(--shadow); }
+  .st small { display: block; color: var(--hint); font-size: 11px; }
+  .st b { display: block; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
+
+  /* Mavzular ro'yxati */
+  .topic { display: flex; gap: 14px; align-items: center; width: 100%; border: 0; background: var(--card); border-radius: 20px; padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); text-align: left; cursor: pointer; }
+  .topic .art { width: 52px; height: 52px; border-radius: 14px; background: var(--card2); display: grid; place-items: center; font-size: 30px; flex: none; }
+  .topic b { display: block; font-size: 15px; }
+  .topic small { display: block; color: var(--hint); font-size: 12px; margin: 1px 0 4px; }
+  .topic .status { font-size: 12px; color: var(--hint); font-weight: 500; }
+  .topic .status.done { color: var(--green-2); }
+  .topic .chev { margin-left: auto; color: var(--hint); font-size: 18px; }
+
+  /* Mavzu sahifasi */
+  .showcase { text-align: center; margin: 4px 0 18px; }
+  .showcase .art { font-size: 96px; line-height: 1.1; filter: drop-shadow(0 12px 14px rgba(0,0,0,.2)); }
+  .showcase h1 { font-size: 26px; font-weight: 800; margin: 8px 0 2px; letter-spacing: -.02em; }
+  .showcase small { color: var(--hint); }
+  .label { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--hint); text-transform: uppercase; margin: 0 2px 8px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .toggle-row:last-child { border-bottom: 0; }
+  .switch { position: relative; width: 46px; height: 28px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; background: var(--line); border-radius: 20px; transition: .2s; cursor: pointer; }
+  .switch span::before { content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .switch input:checked + span { background: var(--green-2); }
+  .switch input:checked + span::before { transform: translateX(18px); }
+
+  /* Tugmalar */
+  .btn { display: block; width: 100%; border: 0; border-radius: 16px; padding: 15px; font-size: 16px; font-weight: 700; background: var(--green); color: #fff; cursor: pointer; margin-top: 12px; }
+  .btn.light { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+  .btn:disabled { opacity: .45; }
+  .sticky { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
+  .sticky .btn { max-width: 488px; margin: 0 auto; }
+
+  /* ---------- Test ---------- */
+  .pill { justify-self: end; background: var(--card); box-shadow: var(--shadow); border-radius: 20px; padding: 7px 11px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pill.low { color: var(--red); }
+  .qbar { display: flex; justify-content: space-between; font-size: 12px; color: var(--hint); margin: 0 2px 6px; font-weight: 500; }
+  .qprogress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .qprogress i { display: block; height: 100%; background: var(--green-2); width: 0; transition: width .25s; }
+  .media { margin: 0 auto 14px; }
+  .media.sign { width: 120px; height: 120px; }
+  .media.scene { width: 100%; border-radius: 16px; overflow: hidden; aspect-ratio: 1; max-width: 360px; }
+  .media.photo { width: 100%; border-radius: 16px; overflow: hidden; }
+  .media svg, .media img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .question { font-size: 17px; font-weight: 700; line-height: 1.35; margin-bottom: 14px; letter-spacing: -.01em; }
+  .opt { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border: 1.5px solid var(--line); background: var(--card); border-radius: 16px; padding: 12px 14px; margin-bottom: 9px; font-size: 15px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .opt .let { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex: none; color: var(--hint); }
+  .opt.correct { border-color: var(--green-2); background: var(--green-soft); }
+  .opt.correct .let { background: var(--green-2); color: #fff; }
+  .opt.wrong { border-color: var(--red); background: var(--red-soft); }
+  .opt.wrong .let { background: var(--red); color: #fff; }
+  .opt.chosen { border-color: var(--green); }
+  .opt.chosen .let { background: var(--green); color: #fff; }
+  .opt:disabled { cursor: default; }
+  .explain { display: none; margin-top: 4px; padding: 13px 14px; border-radius: 16px; background: var(--card2); font-size: 13.5px; }
+  .explain.show { display: block; }
+  .explain b { display: block; margin-bottom: 3px; font-size: 14px; }
+
+  /* ---------- Natija ---------- */
+  .result-art { width: 130px; height: 130px; margin: 6px auto 16px; border-radius: 32px; background: var(--card); box-shadow: 0 18px 40px rgba(0,0,0,.12); display: grid; place-items: center; font-size: 70px; transform: rotate(-6deg); }
+  .result-title { text-align: center; font-size: 26px; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
+  .result-text { text-align: center; color: var(--hint); margin: 0 0 18px; font-size: 14px; }
+  .score { text-align: center; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .passbar { position: relative; height: 10px; background: var(--line); border-radius: 6px; margin: 0 4px 6px; }
+  .passbar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--green-2); }
+  .passbar i.fail { background: var(--red); }
+  .passbar em { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--text); }
+  .passmark { display: flex; justify-content: space-between; font-size: 11px; color: var(--hint); font-weight: 600; letter-spacing: .04em; margin: 0 4px 16px; }
+  .review .item { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .review .item:last-child { border-bottom: 0; }
+  .ok-t { color: var(--green-2); font-weight: 600; } .bad-t { color: var(--red); font-weight: 600; }
+  .muted { color: var(--hint); }
+
+  /* ---------- Biletlar ---------- */
+  .tickets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  .ticket { border: 0; background: var(--card); box-shadow: var(--shadow); border-radius: 16px; padding: 12px 4px; font-weight: 700; cursor: pointer; }
+  .ticket small { display: block; font-size: 11px; color: var(--hint); font-weight: 500; }
+  .ticket.ok { background: var(--green-soft); } .ticket.ok small { color: var(--green-2); }
+  .ticket.bad { background: var(--red-soft); } .ticket.bad small { color: var(--red); }
+
+  /* Mavzu aniqligi */
+  .acc { display: grid; grid-template-columns: 26px 1fr 44px; gap: 10px; align-items: center; padding: 9px 0; font-size: 13px; }
+  .acc .bar { margin-top: 4px; }
+
+  /* ---------- Pastki menyu ---------- */
+  .tabbar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom)); width: calc(100% - 24px); max-width: 496px; background: var(--card); border-radius: 22px; box-shadow: 0 6px 24px rgba(0,0,0,.1); display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px; z-index: 5; }
+  .tabbar button { border: 0; background: none; border-radius: 16px; padding: 7px 2px 6px; font-size: 11px; font-weight: 600; color: var(--hint); cursor: pointer; }
+  .tabbar button span { display: block; font-size: 19px; line-height: 1.2; filter: grayscale(1); opacity: .7; }
+  .tabbar button.on { background: var(--card2); color: var(--text); }
+  .tabbar button.on span { filter: none; opacity: 1; }
+  .tabbar.hidden { display: none; }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- =================== BOSH SAHIFA =================== -->
+  <section id="overview" class="screen active">
+    <div class="top">
+      <div><div class="muted" id="hello" style="font-size:13px;font-weight:500"></div><h1 class="big-title">Avto Test</h1></div>
+      <div class="top-right"><div class="avatar" id="avatar">AT</div></div>
+    </div>
+    <div class="hero">
+      <div class="art">🚗</div>
+      <h3>Imtihon sinovi</h3>
+      <p id="examInfo"></p>
+      <button data-action="exam">Boshlash</button>
+    </div>
+    <div class="card">
+      <div class="label">Imtihonga tayyorgarlik</div>
+      <div class="ready">
+        <div class="pct" id="readyPct">0%</div>
+        <div style="flex:1"><div class="bar"><i id="readyBar"></i></div><small id="readyText"></small></div>
+      </div>
+    </div>
+    <div class="stats3" id="overviewStats"></div>
+    <div class="section-title">Tavsiya etiladi</div>
+    <div id="suggest"></div>
+  </section>
+
+  <!-- =================== MAVZULAR =================== -->
+  <section id="theory" class="screen">
+    <div class="nav"><span></span><div><h2>Nazariya</h2><small>YHQ bo'limlari</small></div><div class="ring" id="theoryRing"></div></div>
+    <div class="stats4" id="theoryStats"></div>
+    <div id="topicList"></div>
+  </section>
+
+  <!-- =================== MASHQ =================== -->
+  <section id="practice" class="screen">
+    <div class="top"><h1 class="big-title">Mashq</h1><div class="top-right"><div class="avatar" id="avatar2">AT</div></div></div>
+    <div class="tiles">
+      <button class="tile" data-action="theory-tab"><div class="art">📚</div><b>Nazariya</b><div class="meta"><span>Savollar</span><span id="thMeta"></span></div><div class="bar"><i id="thBar"></i></div></button>
+      <button class="tile" data-action="anim"><div class="art">🎬</div><b>Vaziyatlar</b><div class="meta"><span>Animatsiya</span><span id="anMeta"></span></div><div class="bar"><i id="anBar"></i></div></button>
+    </div>
+    <button class="wide" data-action="exam"><div class="art">📝</div><div><b>Imtihon sinovi</b><small id="examInfo2"></small></div><span class="chev">›</span></button>
+    <div class="section-title">Yana</div>
+    <div class="list">
+      <button class="row" data-action="tickets"><span class="ico">🎫</span><div><b>Biletlar</b><small id="ticketsInfo"></small></div><span class="chev">›</span></button>
+      <button class="row" data-action="random"><span class="ico">🎲</span><div><b>Tasodifiy savollar</b><small>Aralash 10 ta savol</small></div><span class="chev">›</span></button>
+      <button class="row" data-action="mistakes"><span class="ico">✏️</span><div><b>Xatolar</b><small id="mistakesInfo"></small></div><span class="chev">›</span></button>
+      <button class="row" data-action="marathon"><span class="ico">🏃</span><div><b>Marafon</b><small id="marathonInfo"></small></div><span class="chev">›</span></button>
+    </div>
+  </section>
+
+  <!-- =================== NATIJALAR =================== -->
+  <section id="progress" class="screen">
+    <div class="top"><h1 class="big-title">Natijalar</h1></div>
+    <div class="stats4" id="progStats"></div>
+    <div class="label" style="margin-top:6px">Mavzular bo'yicha aniqlik</div>
+    <div class="card" id="topicAcc"></div>
+    <button class="btn light" id="resetBtn">Natijalarni tozalash</button>
+  </section>
+
+  <!-- =================== MAVZU =================== -->
+  <section id="topicScreen" class="screen">
+    <div class="nav"><button class="circle-btn" data-back>‹</button><div><h2>Mashq</h2><small>Test sozlamalari</small></div><div class="ring" id="topicRing"></div></div>
+    <div class="showcase"><div class="art" id="tArt"></div><h1 id="tTitle"></h1><small id="tSub"></small></div>
+    <div class="card">
+      <div class="label">Javoblaringiz</div>
+      <div class="stats3" id="tStats"></div>
+    </div>
+    <div class="card">
+      <div class="label">Qo'shimcha sozlamalar</div>
+      <div class="toggle-row"><span>Faqat xato qilinganlar</span><label class="switch"><input type="checkbox" id="optMistakes"><span></span></label></div>
+      <div class="toggle-row"><span>Savollarni aralashtirish</span><label class="switch"><input type="checkbox" id="optShuffle" checked><span></span></label></div>
+    </div>
+    <div class="sticky"><button class="btn" id="topicStart">Boshlash</button></div>
+  </section>
+
+  <!-- =================== BILETLAR =================== -->
+  <section id="ticketsScreen" class="screen">
+    <div class="nav"><button class="circle-btn" data-back>‹</button><div><h2>Biletlar</h2><small>Har birida 20 savol</small></div><span></span></div>
+    <div class="tickets" id="ticketsGrid"></div>
+  </section>
+
+  <!-- =================== TEST =================== -->
+  <section id="quiz" class="screen">
+    <div class="nav"><button class="circle-btn" data-back>‹</button><div><h2 id="qTitle"></h2><small id="qCounter"></small></div><span class="pill" id="timer"></span></div>
+    <div class="qbar"><span id="qLeft"></span><span id="qScore"></span></div>
+    <div class="qprogress"><i id="qProg"></i></div>
+    <div class="card">
+      <div class="media" id="qImg"></div>
+      <div class="question" id="qText"></div>
+      <div id="qOptions"></div>
+      <div class="explain" id="qExplain"></div>
+    </div>
+    <div class="sticky"><button class="btn" id="nextBtn" disabled>Keyingi</button></div>
+  </section>
+
+  <!-- =================== NATIJA =================== -->
+  <section id="result" class="screen">
+    <div class="nav"><button class="circle-btn" data-back>‹</button><div><h2>Natija</h2></div><span></span></div>
+    <div class="result-art" id="rIcon"></div>
+    <h1 class="result-title" id="rTitle"></h1>
+    <p class="result-text" id="rText"></p>
+    <div class="score" id="rScore"></div>
+    <div class="passbar"><i id="rBar"></i><em id="rMark"></em></div>
+    <div class="passmark"><span>0</span><span id="rMarkText"></span><span>100</span></div>
+    <div class="card review" id="rReview"></div>
+    <button class="btn" id="sendBtn" style="display:none">📤 Natijani botga yuborish</button>
+    <button class="btn" id="retryBtn">Qayta urinish</button>
+    <button class="btn light" data-back>Orqaga</button>
+  </section>
+
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-tab="overview" class="on"><span>🏠</span>Asosiy</button>
+  <button data-tab="theory"><span>📖</span>Nazariya</button>
+  <button data-tab="practice"><span>🎯</span>Mashq</button>
+  <button data-tab="progress"><span>📊</span>Natijalar</button>
+</nav>
+
+<script src="questions.js"></script>
+<script src="questions2.js"></script>
+<script src="scenes.js"></script>
+<script>
+// ===== Sozlamalar =====
+// count — savollar soni, minutes — vaqt, maxErrors — ruxsat etilgan xatolar,
+// animated — imtihondagi animatsion savollar soni, stopOnFail — ruxsatdan ortiq xatoda imtihon to'xtaydi
+const EXAM = { count: 20, minutes: 25, maxErrors: 2, animated: 5, stopOnFail: true };
+
+const TOPIC_META = {
+  anim: ["🎬", "Harakatlanuvchi yo'l vaziyatlari"], general: ["📋", "Hujjatlar, toifalar, majburiyatlar"],
+  lights: ["🚦", "Svetofor va tartibga soluvchi ishoralari"], warnings: ["⚠️", "Burilish, avariya ishoralari"],
+  maneuver: ["🔀", "Burilish, qayrilish, qatorlar"], speed: ["⏱️", "Tezlik cheklovlari"],
+  overtaking: ["🏎️", "Quvib o'tish qoidalari"], stopping: ["🅿️", "To'xtash va to'xtab turish"],
+  junction: ["✖️", "Ustuvorlik va chorrahalar"], crossing: ["🚸", "Piyodalar va bekatlar"],
+  railway: ["🚆", "Temir yo'l kesishmalari"], special: ["🚑", "Maxsus va yo'nalishli transport"],
+  lighting: ["💡", "Faralar va chiroqlar"], towing: ["⛓️", "Shatakka olish"],
+  people: ["🚌", "Odam tashish, magistral, o'qitish"], signs: ["🛑", "Yo'l belgilari"],
+  safety: ["🩹", "Tibbiy yordam va texnik holat"],
+  terms: ["📘", "To'xtash, asosiy yo'l, yondosh hudud..."], pedestrians: ["🚶", "Piyoda va yo'lovchi majburiyatlari"],
+  markings: ["〰️", "Yaxlit, uzuq va sariq chiziqlar"], idsigns: ["🔰", "Boshlovchi, o'quv, kar haydovchi belgilari"],
+  cargo: ["📦", "Yuk o'lchamlari va mahkamlash"], bikes: ["🚲", "Velosiped, moped, arava, hayvonlar"],
+};
+// Noma'lum mavzu bo'lsa ham ilova buzilmasin
+Object.keys(TOPICS).forEach((t) => { if (!TOPIC_META[t]) TOPIC_META[t] = ["📄", ""]; });
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTg = !!(tg && tg.initData);
+// ===== Mavzu (yorug'/qorong'i) =====
+const dark = inTg ? tg.colorScheme === "dark" : window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+document.documentElement.dataset.theme = dark ? "dark" : "light";
+if (tg) {
+  tg.ready(); tg.expand();
+  try { const bg = dark ? "#101211" : "#f3f2ee"; tg.setHeaderColor(bg); tg.setBackgroundColor(bg); } catch (e) {}
+}
+const haptic = (t) => { try { tg && tg.HapticFeedback.notificationOccurred(t); } catch (e) {} };
+
+// ===== Saqlash =====
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const getMistakes = () => store.get("avto_mistakes", []);
+const getStats = () => store.get("avto_stats", { answered: 0, correct: 0, exams: 0, passed: 0, best: null, topics: {} });
+const getQS = () => store.get("avto_qstat", {});           // savol bo'yicha: { id: { c: to'g'ri, w: xato, ok: oxirgisi } }
+
+// ===== Yordamchilar =====
+const $ = (id) => document.getElementById(id);
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const byTopic = (t) => QUESTIONS.filter((q) => q.topic === t);
+const mastered = (list, qs = getQS()) => list.filter((q) => qs[q.id] && qs[q.id].c > 0).length;
+function ring(p) {
+  const r = 16, c = 2 * Math.PI * r;
+  return `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" fill="none" stroke="var(--line)" stroke-width="4"/><circle cx="20" cy="20" r="${r}" fill="none" stroke="var(--green-2)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(c * p) / 100} ${c}"/></svg><span>${p}%</span>`;
+}
+
+// Foydalanuvchi ismi
+const user = inTg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+const initials = user ? ((user.first_name || "")[0] || "") + ((user.last_name || "")[0] || "") : "AT";
+$("avatar").textContent = $("avatar2").textContent = initials.toUpperCase() || "AT";
+$("hello").textContent = user ? `Salom, ${user.first_name}! 👋` : "Salom! 👋";
+
+// ===== Navigatsiya =====
+const TABS = ["overview", "theory", "practice", "progress"];
+let current = "overview", hist = [], timerId = null, S = null, curTopic = null;
+const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic) };
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
+  current = id;
+  const isTab = TABS.includes(id);
+  $("tabbar").classList.toggle("hidden", !isTab);
+  document.querySelectorAll("[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === id));
+  if (inTg) isTab ? tg.BackButton.hide() : tg.BackButton.show();
+  window.scrollTo(0, 0);
+}
+function goTab(id) { hist = []; RENDER[id](); show(id); }
+function open(id) { hist.push(current); if (RENDER[id]) RENDER[id](); show(id); }
+function back() {
+  if (current === "quiz" && S && S.answers.length) {
+    const leave = () => { stopTimer(); doBack(); };
+    if (tg && tg.showConfirm && inTg) tg.showConfirm("Testdan chiqasizmi? Natija saqlanmaydi.", (ok) => ok && leave());
+    else if (confirm("Testdan chiqasizmi? Natija saqlanmaydi.")) leave();
+    return;
+  }
+  stopTimer(); doBack();
+}
+function doBack() { const prev = hist.pop() || "overview"; if (RENDER[prev]) RENDER[prev](); show(prev); }
+function stopTimer() { clearInterval(timerId); timerId = null; }
+
+// ===== Bosh sahifa =====
+function examLine() { return `${EXAM.count} savol · ${EXAM.minutes} daqiqa · ${EXAM.maxErrors} tagacha xato`; }
+function renderOverview() {
+  const qs = getQS(), st = getStats(), m = mastered(QUESTIONS, qs), p = pct(m, QUESTIONS.length);
+  $("examInfo").textContent = examLine();
+  $("readyPct").textContent = p + "%";
+  $("readyBar").style.width = p + "%";
+  $("readyText").textContent = `${QUESTIONS.length} ta savoldan ${m} tasi o'zlashtirildi`;
+  const tres = store.get("avto_tickets", {});
+  $("overviewStats").innerHTML = [
+    [`${st.passed}/${st.exams}`, "Imtihon"], [`${Object.values(tres).filter((r) => r.passed).length}/${getTickets().length}`, "Biletlar"], [getMistakes().length, "Xatolar"],
+  ].map(([v, l]) => `<div class="st"><b>${v}</b><small>${l}</small></div>`).join("");
+  // Eng kam o'zlashtirilgan 3 mavzu
+  const weak = Object.keys(TOPICS).map((t) => ({ t, p: pct(mastered(byTopic(t), qs), byTopic(t).length) }))
+    .filter((x) => x.p < 100).sort((a, b) => a.p - b.p).slice(0, 3);
+  $("suggest").innerHTML = weak.map(({ t, p }) => topicCard(t, qs)).join("") || `<div class="card center muted">Barcha mavzular o'zlashtirilgan 🎉</div>`;
+}
+
+// ===== Mavzular =====
+function topicCard(t, qs) {
+  const list = byTopic(t), done = mastered(list, qs);
+  const status = done === list.length ? `<span class="status done">✓ O'zlashtirildi</span>` : `<span class="status">◷ ${done}/${list.length} savol</span>`;
+  return `<button class="topic" data-topic="${t}"><span class="art">${TOPIC_META[t][0]}</span><span><b>${esc(TOPICS[t].replace(/^🎬 /, ""))}</b><small>${esc(TOPIC_META[t][1])}</small>${status}</span><span class="chev">›</span></button>`;
+}
+function renderTheory() {
+  const qs = getQS();
+  $("theoryRing").innerHTML = ring(pct(mastered(QUESTIONS, qs), QUESTIONS.length));
+  $("theoryStats").innerHTML = [[Object.keys(TOPICS).length, "Mavzu"], [QUESTIONS.length, "Savol"], [getTickets().length, "Bilet"], [byTopic("anim").length, "Animatsiya"]]
+    .map(([v, l]) => `<div class="st"><small>${l}</small><b>${v}</b></div>`).join("");
+  $("topicList").innerHTML = Object.keys(TOPICS).map((t) => topicCard(t, qs)).join("");
+}
+
+// ===== Mashq =====
+function renderPractice() {
+  const qs = getQS(), theory = QUESTIONS.filter((q) => q.topic !== "anim"), anim = byTopic("anim");
+  const a = mastered(theory, qs), b = mastered(anim, qs);
+  $("thMeta").textContent = `${a}/${theory.length}`; $("thBar").style.width = pct(a, theory.length) + "%";
+  $("anMeta").textContent = `${b}/${anim.length}`; $("anBar").style.width = pct(b, anim.length) + "%";
+  $("examInfo2").textContent = examLine();
+  const res = store.get("avto_tickets", {});
+  $("ticketsInfo").textContent = `${getTickets().length} ta bilet · ${Object.values(res).filter((r) => r.passed).length} tasi o'tilgan`;
+  const m = getMistakes().length;
+  $("mistakesInfo").textContent = m ? `${m} ta savolni takrorlang` : "Hozircha xato yo'q";
+  $("marathonInfo").textContent = `Barcha ${QUESTIONS.length} ta savol ketma-ket`;
+}
+
+// ===== Mavzu sahifasi =====
+function renderTopic(t) {
+  const list = byTopic(t), qs = getQS();
+  const ok = list.filter((q) => qs[q.id] && qs[q.id].ok).length, bad = list.filter((q) => qs[q.id] && qs[q.id].ok === false).length;
+  $("tArt").textContent = TOPIC_META[t][0];
+  $("tTitle").textContent = TOPICS[t].replace(/^🎬 /, "");
+  $("tSub").textContent = TOPIC_META[t][1];
+  $("topicRing").innerHTML = ring(pct(mastered(list, qs), list.length));
+  $("tStats").innerHTML = [["#8a8d93", "Savollar", list.length], ["var(--green-2)", "To'g'ri", ok], ["var(--red)", "Noto'g'ri", bad]]
+    .map(([c, l, v]) => `<div style="text-align:left"><small class="muted" style="font-size:12px"><span class="dot" style="background:${c}"></span>${l}</small><div style="font-size:26px;font-weight:800">${v}</div></div>`).join("");
+  const prefs = store.get("avto_prefs", { onlyMistakes: false, shuffle: true });
+  $("optMistakes").checked = prefs.onlyMistakes; $("optShuffle").checked = prefs.shuffle;
+}
+["optMistakes", "optShuffle"].forEach((id) => $(id).addEventListener("change", () =>
+  store.set("avto_prefs", { onlyMistakes: $("optMistakes").checked, shuffle: $("optShuffle").checked })));
+$("topicStart").addEventListener("click", () => {
+  let list = byTopic(curTopic);
+  if ($("optMistakes").checked) {
+    const ids = getMistakes(); list = list.filter((q) => ids.includes(q.id));
+    if (!list.length) { alertMsg("Bu mavzuda xato qilingan savollar yo'q 👍"); return; }
+  }
+  startQuiz($("optShuffle").checked ? shuffle(list) : list, "train", TOPICS[curTopic].replace(/^🎬 /, ""));
+});
+
+// ===== Natijalar =====
+function renderProgress() {
+  const st = getStats(), qs = getQS();
+  $("progStats").innerHTML = [[st.answered, "Javob"], [pct(st.correct, st.answered) + "%", "Aniqlik"], [`${st.passed}/${st.exams}`, "Imtihon"], [st.best === null ? "—" : st.best, "Rekord"]]
+    .map(([v, l]) => `<div class="st"><small>${l}</small><b>${v}</b></div>`).join("");
+  $("topicAcc").innerHTML = Object.keys(TOPICS).map((t) => {
+    const s = st.topics[t], p = s ? pct(s.c, s.a) : 0;
+    return `<div class="acc"><span style="font-size:18px">${TOPIC_META[t][0]}</span><div>${esc(TOPICS[t].replace(/^🎬 /, ""))}<div class="bar"><i style="width:${p}%;${p < 70 && s ? "background:var(--amber)" : ""}"></i></div></div><b style="text-align:right">${s ? p + "%" : "—"}</b></div>`;
+  }).join("");
+}
+$("resetBtn").addEventListener("click", () => {
+  const doReset = () => { ["avto_stats", "avto_mistakes", "avto_tickets", "avto_qstat"].forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} }); renderProgress(); };
+  if (inTg && tg.showConfirm) tg.showConfirm("Barcha natijalar o'chirilsinmi?", (ok) => ok && doReset());
+  else if (confirm("Barcha natijalar o'chirilsinmi?")) doReset();
+});
+
+// ===== Imtihon va biletlar =====
+function buildExam() {
+  const anim = shuffle(byTopic("anim")).slice(0, EXAM.animated);
+  const rest = shuffle(QUESTIONS.filter((q) => q.topic !== "anim")).slice(0, EXAM.count - anim.length);
+  return shuffle(anim.concat(rest));
+}
+// Biletlar doimiy: qat'iy urug' (seed) bilan aralashtiriladi, har bilet — 20 savol
+function seeded(seed) { return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+let TICKETS = null;
+function getTickets() {
+  if (TICKETS) return TICKETS;
+  const rnd = seeded(2026), mix = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const anim = mix(byTopic("anim")), rest = mix(QUESTIONS.filter((q) => q.topic !== "anim"));
+  const n = Math.max(1, Math.floor(QUESTIONS.length / EXAM.count));
+  TICKETS = Array.from({ length: n }, () => []);
+  anim.forEach((q, i) => TICKETS[i % n].push(q));
+  let k = 0;
+  for (const t of TICKETS) while (t.length < EXAM.count && k < rest.length) t.push(rest[k++]);
+  return TICKETS;
+}
+function renderTickets() {
+  const res = store.get("avto_tickets", {});
+  $("ticketsGrid").innerHTML = getTickets().map((t, i) => {
+    const r = res[i + 1];
+    return `<button class="ticket ${r ? (r.passed ? "ok" : "bad") : ""}" data-ticket="${i}">№${i + 1}<small>${r ? r.correct + "/" + r.total : "—"}</small></button>`;
+  }).join("");
+}
+
+// ===== Bosishlar =====
+document.addEventListener("click", (e) => {
+  const el = (s) => e.target.closest(s);
+  if (el("[data-back]")) return back();
+  const tab = el("[data-tab]"); if (tab) return goTab(tab.dataset.tab);
+  const tp = el("[data-topic]"); if (tp) { curTopic = tp.dataset.topic; return open("topicScreen"); }
+  const tk = el("[data-ticket]");
+  if (tk) { const i = Number(tk.dataset.ticket); startQuiz(getTickets()[i], "ticket", `Bilet №${i + 1}`); S.ticket = i + 1; return; }
+  const a = el("[data-action]"); if (!a) return;
+  const act = a.dataset.action;
+  if (act === "exam") startQuiz(buildExam(), "exam", "Imtihon");
+  if (act === "theory-tab") goTab("theory");
+  if (act === "tickets") open("ticketsScreen");
+  if (act === "anim") startQuiz(shuffle(byTopic("anim")), "train", "Vaziyatlar");
+  if (act === "random") startQuiz(shuffle(QUESTIONS).slice(0, 10), "train", "Tasodifiy");
+  if (act === "marathon") startQuiz(shuffle(QUESTIONS), "train", "Marafon");
+  if (act === "mistakes") {
+    const ids = getMistakes();
+    if (!ids.length) { alertMsg("Xatolar ro'yxati bo'sh 👍"); return; }
+    startQuiz(shuffle(QUESTIONS.filter((q) => ids.includes(q.id))), "mistakes", "Xatolar");
+  }
+});
+function alertMsg(text) { inTg && tg.showAlert ? tg.showAlert(text) : alert(text); }
+
+// ===== Test jarayoni =====
+function startQuiz(list, mode, title) {
+  if (!list.length) return;
+  S = { list, mode, title, i: 0, answers: [] };
+  stopTimer();
+  if (mode === "exam") { S.deadline = Date.now() + EXAM.minutes * 60000; tickTimer(); timerId = setInterval(tickTimer, 1000); $("timer").style.display = ""; }
+  else $("timer").style.display = "none";
+  $("qTitle").textContent = title;
+  if (current !== "quiz" && current !== "result") hist.push(current);
+  show("quiz");
+  renderQuestion();
+}
+function tickTimer() {
+  const left = Math.max(0, S.deadline - Date.now());
+  const m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
+  $("timer").textContent = `⏱ ${m}:${String(s).padStart(2, "0")}`;
+  $("timer").classList.toggle("low", left < 60000);
+  if (left <= 0) finishQuiz(true);
+}
+function renderQuestion() {
+  const q = S.list[S.i];
+  S.order = shuffle(q.options.map((_, k) => k));
+  $("qCounter").textContent = `${S.i + 1} / ${S.list.length}`;
+  const wrong = S.answers.filter((a) => !a.ok).length;
+  $("qLeft").textContent = `Savol ${S.i + 1}`;
+  $("qScore").innerHTML = S.mode === "exam" ? `Xato: <b>${wrong}</b> / ${EXAM.maxErrors}` : `<span class="ok-t">✓ ${S.answers.length - wrong}</span> · <span class="bad-t">✕ ${wrong}</span>`;
+  $("qProg").style.width = `${(S.i / S.list.length) * 100}%`;
+  const box = $("qImg");
+  box.className = "media" + (q.scene ? " scene" : q.img ? (SIGNS[q.img] ? " sign" : " photo") : "");
+  box.innerHTML = q.scene || (q.img ? (SIGNS[q.img] || `<img src="${esc(q.img)}" alt="">`) : "");
+  box.style.display = q.scene || q.img ? "block" : "none";
+  $("qText").textContent = q.q;
+  $("qOptions").innerHTML = S.order.map((k, n) => `<button class="opt" data-k="${k}"><span class="let">${"ABCDE"[n]}</span><span>${esc(q.options[k])}</span></button>`).join("");
+  $("qExplain").className = "explain";
+  $("nextBtn").disabled = true;
+  $("nextBtn").textContent = S.i === S.list.length - 1 ? "Yakunlash" : "Keyingi";
+}
+$("qOptions").addEventListener("click", (e) => {
+  const b = e.target.closest(".opt");
+  if (!b || b.disabled) return;
+  const q = S.list[S.i], k = Number(b.dataset.k), ok = k === q.answer;
+  S.answers.push({ id: q.id, chosen: k, ok });
+  saveAnswer(q, ok);
+  const btns = $("qOptions").querySelectorAll(".opt");
+  btns.forEach((x) => (x.disabled = true));
+  if (S.mode === "exam") b.classList.add("chosen");
+  else {
+    btns.forEach((x) => { if (Number(x.dataset.k) === q.answer) x.classList.add("correct"); });
+    if (!ok) b.classList.add("wrong");
+    $("qExplain").innerHTML = `<b>${ok ? "✅ To'g'ri!" : "❌ Noto'g'ri"}</b>${esc(q.explain || "")}`;
+    $("qExplain").classList.add("show");
+  }
+  haptic(ok || S.mode === "exam" ? "success" : "error");
+  $("nextBtn").disabled = false;
+  if (S.mode === "exam" && EXAM.stopOnFail && S.answers.filter((a) => !a.ok).length > EXAM.maxErrors) {
+    $("nextBtn").textContent = "Natijani ko'rish"; S.stopped = true;
+  }
+});
+$("nextBtn").addEventListener("click", () => {
+  if (S.stopped) finishQuiz(false);
+  else if (S.i < S.list.length - 1) { S.i++; renderQuestion(); }
+  else finishQuiz(false);
+});
+function saveAnswer(q, ok) {
+  const st = getStats();
+  st.answered++; if (ok) st.correct++;
+  const t = st.topics[q.topic] || { a: 0, c: 0 };
+  t.a++; if (ok) t.c++; st.topics[q.topic] = t;
+  store.set("avto_stats", st);
+  const qs = getQS(), r = qs[q.id] || { c: 0, w: 0 };
+  ok ? r.c++ : r.w++; r.ok = ok; qs[q.id] = r; store.set("avto_qstat", qs);
+  let m = getMistakes();
+  if (!ok && !m.includes(q.id)) m.push(q.id);
+  if (ok && S.mode === "mistakes") m = m.filter((x) => x !== q.id);
+  store.set("avto_mistakes", m);
+}
+
+function finishQuiz(timeUp) {
+  stopTimer();
+  const total = S.list.length, correct = S.answers.filter((a) => a.ok).length, wrong = total - correct;
+  const isExam = S.mode === "exam", strict = isExam || S.mode === "ticket";
+  const passed = strict ? wrong <= EXAM.maxErrors : correct === total;
+  if (isExam) {
+    const st = getStats(); st.exams++; if (passed) st.passed++;
+    if (st.best === null || correct > st.best) st.best = correct;
+    store.set("avto_stats", st);
+  }
+  if (S.mode === "ticket" && S.ticket) { const res = store.get("avto_tickets", {}); res[S.ticket] = { correct, total, passed }; store.set("avto_tickets", res); }
+
+  const p = pct(correct, total), mark = strict ? pct(total - EXAM.maxErrors, total) : 100;
+  $("rIcon").textContent = passed ? "✅" : "❌";
+  $("rTitle").textContent = passed ? "Test topshirildi!" : "Test topshirilmadi";
+  const wrongAnswered = S.answers.filter((a) => !a.ok).length;
+  $("rText").textContent = S.stopped
+    ? `Imtihon to'xtatildi: ${wrongAnswered} ta xato (ruxsat — ${EXAM.maxErrors} ta).`
+    : `${esc(S.title)}: ${total} tadan ${correct} ta to'g'ri, ${wrong} ta xato` + (timeUp ? " · vaqt tugadi" : "");
+  $("rScore").textContent = p + "%";
+  $("rBar").style.width = p + "%"; $("rBar").className = passed ? "" : "fail";
+  $("rMark").style.left = mark + "%";
+  $("rMarkText").textContent = strict ? `O'TISH CHEGARASI ${mark}%` : "BARCHASI TO'G'RI BO'LISHI KERAK";
+
+  const wrongList = S.list.map((q, n) => ({ q, a: S.answers[n] })).filter((x) => (x.a && !x.a.ok) || (!x.a && !S.stopped));
+  $("rReview").innerHTML = wrongList.length
+    ? `<div class="label">Xatolar tahlili</div>` + wrongList.map(({ q, a }) => `
+        <div class="item"><b>${esc(q.q)}</b><br>
+          ${a ? `<span class="bad-t">✕ ${esc(q.options[a.chosen])}</span><br>` : `<span class="bad-t">Javob berilmagan</span><br>`}
+          <span class="ok-t">✓ ${esc(q.options[q.answer])}</span>
+          ${q.explain ? `<div class="muted" style="margin-top:4px">${esc(q.explain)}</div>` : ""}</div>`).join("")
+    : `<div style="text-align:center">Barcha javoblar to'g'ri 👏</div>`;
+
+  S.result = { type: "exam_result", mode: S.mode, total, correct, wrong, passed, time_up: timeUp };
+  $("sendBtn").style.display = inTg && isExam ? "block" : "none";
+  haptic(passed ? "success" : "warning");
+  show("result");
+}
+$("retryBtn").addEventListener("click", () => {
+  const { list, mode, title, ticket } = S;
+  startQuiz(mode === "exam" ? buildExam() : shuffle(list), mode, title); S.ticket = ticket;
+});
+$("sendBtn").addEventListener("click", () => {
+  try { tg.sendData(JSON.stringify(S.result)); }
+  catch (e) { alertMsg("Natijani yuborish uchun ilovani bot pastidagi «📝 Testni boshlash» tugmasi orqali oching."); }
+});
+if (inTg) tg.BackButton.onClick(back);
+
+renderOverview();
+</script>
+</body>
+</html>
