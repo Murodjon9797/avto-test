@@ -1,8 +1,10 @@
 // =====================================================================
-//  ANIMATSION (GIF ko'rinishidagi) SAVOLLAR
-//  Har bir vaziyat SVG + SMIL animatsiyasi bilan chiziladi. Shuning uchun
-//  fayl yengil, istalgan ekranda tiniq va internetsiz ishlaydi.
-//  Haqiqiy .gif fayl ham qo'shish mumkin: Q(..., "img/vaziyat.gif").
+//  ANIMATSION (GIF ko'rinishidagi) SAVOLLAR — realistik grafika
+//  Har bir vaziyat SVG + SMIL animatsiyasi bilan chiziladi: teksturali asfalt,
+//  trotuar, maysa, daraxtlar, uylar; soyali, farali, oynali avtomobillar.
+//  Harakat tamoyillari (motion-foundations): silliq easing bilan sekinlashish,
+//  to'xtaganda tormoz chiroqlari yonadi, faqat transform animatsiyasi,
+//  "kamroq harakat" sozlamasi hurmat qilinadi (index.html da).
 //
 //  Xarita: yuqori — shimol. O'ng tomonlama harakat.
 //  Chorraha: yo'llar 120..180; shimolga ketish qatori x=165,
@@ -10,94 +12,169 @@
 // =====================================================================
 
 const SCN = (() => {
-  const GRASS = "#9ccc65", ROAD = "#5f6368", OFF = "#2b2b2b";
-  const wrap = (inner) => `<svg viewBox="0 0 300 300" class="scene" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
-  const dash = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="2" stroke-dasharray="9 7"/>`;
-  const solid = (x1, y1, x2, y2, w = 2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${w}"/>`;
-  const grass = `<rect width="300" height="300" fill="${GRASS}"/>`;
+  // ---- Harakat tokenlari (motion-foundations: smooth / sharp easing)
+  const EASE = { smooth: "0.22 1 0.36 1", sharp: "0.4 0 0.2 1", linear: "0 0 1 1" };
+  const OFF = "#262a2f", SIDEWALK = "#cfcac0", CURB = "#a8a399";
+
+  const shade = (hex, amt) => {
+    let c = hex.replace("#", "");
+    if (c.length === 3) c = [...c].map((x) => x + x).join("");
+    const n = parseInt(c, 16), cl = (v) => Math.max(0, Math.min(255, v));
+    return "#" + [(n >> 16) + amt, ((n >> 8) & 255) + amt, (n & 255) + amt].map((v) => cl(v).toString(16).padStart(2, "0")).join("");
+  };
+
+  const DEFS = `<defs>
+    <pattern id="asph" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#4a4e54"/><circle cx="2" cy="3" r=".7" fill="#565a60"/><circle cx="7" cy="7" r=".6" fill="#40444a"/><circle cx="8" cy="2" r=".5" fill="#5b5f66"/><circle cx="4" cy="8" r=".4" fill="#52565c"/></pattern>
+    <pattern id="grass" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#7cb342"/><path d="M2 5l1-2.4 1 2.4M8 11l1-2.4 1 2.4" stroke="#8fc653" stroke-width=".8" fill="none"/><circle cx="9" cy="3" r=".7" fill="#689f38"/><circle cx="4" cy="9" r=".5" fill="#6aa23a"/></pattern>
+    <pattern id="tiles" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="${SIDEWALK}"/><path d="M0 .3H8M.3 0V8" stroke="#bdb8ad" stroke-width=".6"/></pattern>
+    <radialGradient id="tree" cx=".35" cy=".35" r=".75"><stop offset="0" stop-color="#a5d66b"/><stop offset=".55" stop-color="#5a9431"/><stop offset="1" stop-color="#2f5e1c"/></radialGradient>
+    <linearGradient id="roofA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfd8dc"/><stop offset="1" stop-color="#78909c"/></linearGradient>
+    <linearGradient id="roofB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0a46a"/><stop offset="1" stop-color="#a35d2c"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14202c"/><stop offset=".6" stop-color="#34506a"/><stop offset="1" stop-color="#1a2836"/></linearGradient>
+    <linearGradient id="tlHouse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2d3238"/><stop offset=".5" stop-color="#15181c"/><stop offset="1" stop-color="#2d3238"/></linearGradient>
+  </defs>`;
+  const wrap = (inner) => `<svg viewBox="0 0 300 300" class="scene" xmlns="http://www.w3.org/2000/svg">${DEFS}${inner}</svg>`;
+
+  // ---- Yo'l chiziqlari
+  const dash = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f2f2f2" stroke-opacity=".9" stroke-width="2" stroke-dasharray="10 8"/>`;
+  const solid = (x1, y1, x2, y2, w = 2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f2f2f2" stroke-opacity=".92" stroke-width="${w}"/>`;
+
+  // ---- Atrof-muhit
+  const tree = (x, y, r = 13) => `<circle cx="${x + 3}" cy="${y + 4}" r="${r}" fill="#000" opacity=".22"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#tree)"/><circle cx="${x - r * 0.3}" cy="${y - r * 0.35}" r="${r * 0.35}" fill="#c5e1a5" opacity=".35"/>`;
+  const house = (x, y, w, h, roof = "roofA") => `<rect x="${x + 4}" y="${y + 5}" width="${w}" height="${h}" rx="2" fill="#000" opacity=".22"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="url(#${roof})" stroke="#00000033"/><line x1="${x}" y1="${y + h / 2}" x2="${x + w}" y2="${y + h / 2}" stroke="#00000030" stroke-width="1.2"/><rect x="${x + w * 0.7}" y="${y + 4}" width="6" height="6" fill="#455a64" opacity=".6"/>`;
+  const bush = (x, y) => `<circle cx="${x}" cy="${y}" r="5" fill="#558b2f"/><circle cx="${x + 5}" cy="${y + 2}" r="4" fill="#689f38"/>`;
 
   // --- Fon: chorraha
   function cross(o = {}) {
-    let s = grass + `<rect x="0" y="120" width="300" height="60" fill="${ROAD}"/><rect x="120" y="0" width="60" height="300" fill="${ROAD}"/>`;
-    s += dash(0, 150, 120, 150) + dash(180, 150, 300, 150) + dash(150, 0, 150, 120) + dash(150, 180, 150, 300);
+    let s = `<rect width="300" height="300" fill="url(#asph)"/>`;
+    for (const [x, y] of [[-20, -20], [180, -20], [-20, 180], [180, 180]]) s += `<rect x="${x}" y="${y}" width="140" height="140" rx="18" fill="url(#tiles)" stroke="${CURB}" stroke-width="1.5"/>`;
+    s += `<rect x="-20" y="-20" width="133" height="133" rx="12" fill="url(#grass)"/><rect x="187" y="-20" width="133" height="133" rx="12" fill="url(#grass)"/>`;
+    s += `<rect x="-20" y="187" width="133" height="133" rx="12" fill="url(#grass)"/><rect x="187" y="187" width="133" height="133" rx="12" fill="url(#grass)"/>`;
+    s += house(10, 12, 74, 56, "roofB") + tree(96, 92, 12) + bush(20, 96);
+    s += tree(256, 30, 15) + tree(286, 88, 11) + bush(232, 66);
+    s += tree(34, 246, 16) + house(54, 206, 44, 36) + bush(96, 280);
+    s += house(236, 236, 56, 52) + tree(206, 278, 11);
+    s += dash(0, 150, 116, 150) + dash(184, 150, 300, 150) + dash(150, 0, 150, 116) + dash(150, 184, 150, 300);
     if (o.stop) s += solid(150, 186, 180, 186, 3);
-    if (o.rails) s += `<line x1="0" y1="160" x2="300" y2="160" stroke="#bdbdbd" stroke-width="1.5"/><line x1="0" y1="170" x2="300" y2="170" stroke="#bdbdbd" stroke-width="1.5"/>`;
-    if (o.ring) s += `<circle cx="150" cy="150" r="72" fill="${ROAD}"/><circle cx="150" cy="150" r="36" fill="${GRASS}" stroke="#fff" stroke-width="2"/>`;
+    if (o.rails) s += `<line x1="0" y1="160" x2="300" y2="160" stroke="#9ea3a8" stroke-width="1.6"/><line x1="0" y1="170" x2="300" y2="170" stroke="#9ea3a8" stroke-width="1.6"/>`;
+    if (o.ring) s += `<circle cx="150" cy="150" r="74" fill="url(#asph)"/><circle cx="150" cy="150" r="38" fill="url(#tiles)" stroke="${CURB}" stroke-width="1.5"/><circle cx="150" cy="150" r="32" fill="url(#grass)"/>${tree(150, 150, 13)}<circle cx="150" cy="150" r="55" fill="none" stroke="#f2f2f2" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="8 8"/>`;
     return s;
   }
   // --- Fon: to'g'ri yo'l (y 100..200), ikki tomonlama
   function straight(o = {}) {
-    let s = grass + `<rect x="0" y="100" width="300" height="100" fill="${ROAD}"/>`;
+    let s = `<rect width="300" height="300" fill="url(#grass)"/>`;
+    s += `<rect x="-5" y="90" width="310" height="120" fill="url(#tiles)"/><rect x="-5" y="100" width="310" height="100" fill="url(#asph)"/>`;
+    s += `<line x1="0" y1="100" x2="300" y2="100" stroke="${CURB}" stroke-width="2"/><line x1="0" y1="200" x2="300" y2="200" stroke="${CURB}" stroke-width="2"/>`;
+    s += tree(30, 60, 15) + house(70, 22, 64, 50, "roofB") + tree(170, 64, 13) + tree(212, 40, 16) + house(240, 18, 52, 46);
+    s += tree(26, 250, 14) + house(60, 232, 56, 50) + tree(150, 262, 15) + bush(178, 236) + house(222, 240, 60, 46, "roofB");
     s += o.solidCenter ? solid(0, 150, 300, 150) : dash(0, 150, 300, 150);
     return s;
   }
   // --- Fon: bir tomonlama uch qatorli yo'l (qatorlar y=110,150,190)
   function oneway3() {
-    return grass + `<rect x="0" y="90" width="300" height="120" fill="${ROAD}"/>` + dash(0, 130, 300, 130) + dash(0, 170, 300, 170);
+    let s = `<rect width="300" height="300" fill="url(#grass)"/>`;
+    s += `<rect x="-5" y="80" width="310" height="140" fill="url(#tiles)"/><rect x="-5" y="90" width="310" height="120" fill="url(#asph)"/>`;
+    s += `<line x1="0" y1="90" x2="300" y2="90" stroke="${CURB}" stroke-width="2"/><line x1="0" y1="210" x2="300" y2="210" stroke="${CURB}" stroke-width="2"/>`;
+    s += tree(40, 44, 15) + house(90, 14, 70, 52) + tree(200, 44, 14) + tree(262, 38, 17);
+    s += tree(30, 258, 15) + house(80, 236, 64, 50, "roofB") + tree(200, 260, 14) + bush(250, 244);
+    s += dash(0, 130, 300, 130) + dash(0, 170, 300, 170);
+    for (const y of [110, 150, 190]) s += `<path d="M24 ${y} h14 m-5 -4 l5 4 l-5 4" stroke="#f2f2f2" stroke-opacity=".8" stroke-width="2" fill="none"/>`;
+    return s;
   }
   function zebra(x, y, w, h) { // vertikal zebra (yo'lni kesib o'tadi)
     let s = "";
-    for (let yy = y; yy < y + h; yy += 10) s += `<rect x="${x}" y="${yy}" width="${w}" height="6" fill="#fff"/>`;
+    for (let yy = y + 2; yy < y + h - 2; yy += 10) s += `<rect x="${x}" y="${yy}" width="${w}" height="6" rx="1" fill="#f4f4f4" opacity=".93"/>`;
     return s;
   }
   function sign(key, x, y, size = 22) {
     const inner = SIGNS[key].replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
-    return `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 100 100">${inner}</svg>`;
+    return `<rect x="${x + size / 2 - 1}" y="${y + size - 2}" width="2" height="9" fill="#6b6f75"/><ellipse cx="${x + size / 2 + 4}" cy="${y + size + 7}" rx="6" ry="2" fill="#000" opacity=".2"/><svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 100 100">${inner}</svg>`;
   }
-  const blinkAnim = `<animate attributeName="opacity" values="1;0" dur="0.8s" calcMode="discrete" repeatCount="indefinite"/>`;
 
+  // ---- Harakat: to'xtaydigan transport silliq sekinlashadi (smooth easing)
   function motion(o, rotate) {
     const r = rotate ? (o.reverse ? ` rotate="auto-reverse"` : ` rotate="auto"`) : "";
     const dur = o.dur || 4;
     if (o.loop) return `<animateMotion dur="${dur}s" repeatCount="indefinite"${r} path="${o.path}"/>`;
     const kp = o.keyPoints || "0;1;1", kt = o.keyTimes || `0;${o.hold || 0.55};1`;
-    return `<animateMotion dur="${dur}s" repeatCount="indefinite"${r} path="${o.path}" keyPoints="${kp}" keyTimes="${kt}" calcMode="linear"/>`;
+    const n = kt.split(";").length - 1;
+    const splines = o.keyPoints ? Array(n).fill(EASE.sharp).join(";") : [EASE.smooth, EASE.linear].join(";");
+    return `<animateMotion dur="${dur}s" repeatCount="indefinite"${r} path="${o.path}" keyPoints="${kp}" keyTimes="${kt}" calcMode="spline" keySplines="${splines}"/>`;
   }
-  // --- Transport vositasi (oldi +x tomonda chiziladi)
+  let uid = 0;
+  // --- Transport vositasi (yuqoridan ko'rinish, oldi +x tomonda)
+  function body(kind, color, L, H) {
+    const g = "cb" + ++uid;
+    let s = `<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(color, -50)}"/><stop offset=".22" stop-color="${shade(color, 10)}"/><stop offset=".5" stop-color="${shade(color, 38)}"/><stop offset=".78" stop-color="${shade(color, 10)}"/><stop offset="1" stop-color="${shade(color, -50)}"/></linearGradient></defs>`;
+    s += `<rect x="${-L / 2 + 2}" y="${-H / 2 + 3}" width="${L}" height="${H}" rx="${H * 0.42}" fill="#000" opacity=".3"/>`;
+    const wx = L / 2 - (kind === "car" ? 6.5 : 7), wy = H / 2 - 0.8;
+    for (const x of [wx, -wx]) for (const y of [-wy, wy]) s += `<rect x="${x - 3.2}" y="${y - 1.7}" width="6.4" height="3.4" rx="1.2" fill="#0d0d0d"/>`;
+    s += `<rect x="${-L / 2}" y="${-H / 2}" width="${L}" height="${H}" rx="${kind === "car" ? H * 0.42 : 3}" fill="url(#${g})" stroke="${shade(color, -90)}" stroke-width=".6"/>`;
+    if (kind === "car") {
+      s += `<path d="M${L * 0.08},${-H / 2 + 1.8} L${L * 0.26},${-H / 2 + 3} Q${L * 0.31},0 ${L * 0.26},${H / 2 - 3} L${L * 0.08},${H / 2 - 1.8} Z" fill="url(#glass)"/>`;
+      s += `<rect x="${-L * 0.21}" y="${-H / 2 + 2.1}" width="${L * 0.29}" height="${H - 4.2}" rx="2.6" fill="${shade(color, 22)}" stroke="${shade(color, -70)}" stroke-width=".4"/>`;
+      s += `<path d="M${-L * 0.21},${-H / 2 + 2.1} L${-L * 0.34},${-H / 2 + 3} Q${-L * 0.38},0 ${-L * 0.34},${H / 2 - 3} L${-L * 0.21},${H / 2 - 2.1} Z" fill="url(#glass)"/>`;
+      s += `<rect x="${L * 0.09}" y="${-H / 2 - 1.7}" width="2.4" height="2" rx=".7" fill="${shade(color, -45)}"/><rect x="${L * 0.09}" y="${H / 2 - 0.3}" width="2.4" height="2" rx=".7" fill="${shade(color, -45)}"/>`;
+      s += `<path d="M${L * 0.3},${-H / 2 + 3} Q${L * 0.47},0 ${L * 0.3},${H / 2 - 3}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".8"/>`;
+    } else {
+      s += `<rect x="${-L / 2 + 3}" y="${-H / 2 + 0.9}" width="${L - 10}" height="2.4" fill="url(#glass)"/><rect x="${-L / 2 + 3}" y="${H / 2 - 3.3}" width="${L - 10}" height="2.4" fill="url(#glass)"/>`;
+      s += `<rect x="${L / 2 - 6}" y="${-H / 2 + 2}" width="3.4" height="${H - 4}" rx="1" fill="url(#glass)"/>`;
+      s += `<rect x="${-L * 0.28}" y="-2.6" width="6" height="5.2" rx="1.2" fill="${shade(color, -28)}"/><rect x="${L * 0.04}" y="-2.6" width="6" height="5.2" rx="1.2" fill="${shade(color, -28)}"/>`;
+      if (kind === "tram") s += `<path d="M-8,-5 L0,0 L-8,5" stroke="#263238" stroke-width="1.2" fill="none"/>`;
+    }
+    s += `<ellipse cx="${L / 2 - 1.1}" cy="${-H / 2 + 2.7}" rx="1.3" ry="1.9" fill="#fff7d1"/><ellipse cx="${L / 2 - 1.1}" cy="${H / 2 - 2.7}" rx="1.3" ry="1.9" fill="#fff7d1"/>`;
+    s += `<rect x="${-L / 2 + 0.2}" y="${-H / 2 + 1.6}" width="1.7" height="3.2" rx=".6" fill="#7f1010"/><rect x="${-L / 2 + 0.2}" y="${H / 2 - 4.8}" width="1.7" height="3.2" rx=".6" fill="#7f1010"/>`;
+    return s;
+  }
   function car(o) {
     const kind = o.kind || "car";
-    const L = kind === "bus" ? 42 : kind === "tram" ? 50 : 26, H = kind === "car" ? 14 : 16;
-    const color = o.color || "#1e88e5";
-    let b = `<rect x="${-L / 2}" y="${-H / 2}" width="${L}" height="${H}" rx="3" fill="${color}" stroke="#222" stroke-width="0.8"/>`;
-    b += `<rect x="${L / 2 - 10}" y="${-H / 2 + 2}" width="5" height="${H - 4}" rx="1" fill="#d6ecff"/>`;
-    if (kind === "tram") b += `<rect x="${-L / 2 + 4}" y="-2" width="${L - 8}" height="4" fill="#fff" opacity=".6"/>`;
-    const lamp = (x, y) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#ffa000">${blinkAnim}</circle>`;
-    const fl = L / 2 - 2, rl = -L / 2 + 2, top = -H / 2 + 1, bot = H / 2 - 1;
+    const L = kind === "bus" ? 44 : kind === "tram" ? 52 : 28, H = kind === "car" ? 14 : 16;
+    let b = body(kind, o.color || "#1e88e5", L, H);
+    const dur = o.dur || 4;
+    // Tormoz chiroqlari: transport to'xtash nuqtasiga yaqinlashganda yonadi (holatni bildiradi)
+    if (!o.loop && !o.keyPoints && !o.reverse) {
+      const h = o.hold || 0.55;
+      b += `<g opacity="0"><circle cx="${-L / 2}" cy="${-H / 2 + 3.2}" r="3.6" fill="#ff2d20" opacity=".75"/><circle cx="${-L / 2}" cy="${H / 2 - 3.2}" r="3.6" fill="#ff2d20" opacity=".75"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;${(h * 0.55).toFixed(3)};${h};1" dur="${dur}s" repeatCount="indefinite"/></g>`;
+    }
+    const lamp = (x, y) => `<g><circle cx="${x}" cy="${y}" r="4.2" fill="#ffb300" opacity=".45"/><circle cx="${x}" cy="${y}" r="2.2" fill="#ffd54f"/><animate attributeName="opacity" values="1;0" dur="0.8s" calcMode="discrete" repeatCount="indefinite"/></g>`;
+    const fl = L / 2 - 1.5, rl = -L / 2 + 1.5, top = -H / 2 + 1.2, bot = H / 2 - 1.2;
     if (o.blink === "L" || o.blink === "H") b += lamp(fl, top) + lamp(rl, top);
     if (o.blink === "R" || o.blink === "H") b += lamp(fl, bot) + lamp(rl, bot);
-    if (o.siren) b += `<rect x="-5" y="-4" width="10" height="8" rx="2" fill="#1565c0"><animate attributeName="fill" values="#1565c0;#e53935" dur="0.5s" calcMode="discrete" repeatCount="indefinite"/></rect>`;
+    if (o.siren) b += `<rect x="-6" y="-4.5" width="12" height="9" rx="2" fill="#fafafa" stroke="#999" stroke-width=".4"/><g><circle cx="-2.5" cy="0" r="6" fill="#2979ff" opacity=".5"/><rect x="-5" y="-3.5" width="5" height="7" rx="1.4" fill="#2979ff"/><animate attributeName="opacity" values="1;0.15" dur="0.5s" calcMode="discrete" repeatCount="indefinite"/></g><g><circle cx="2.5" cy="0" r="6" fill="#ff1744" opacity=".5"/><rect x="0" y="-3.5" width="5" height="7" rx="1.4" fill="#ff1744"/><animate attributeName="opacity" values="0.15;1" dur="0.5s" calcMode="discrete" repeatCount="indefinite"/></g>`;
     let s = `<g>${b}${motion(o, true)}</g>`;
     if (o.label) {
-      const w = Math.max(14, o.label.length * 6 + 6);
-      s += `<g>${motion(o, false)}<g transform="translate(0,-17)"><rect x="${-w / 2}" y="-7" width="${w}" height="13" rx="4" fill="#fff" stroke="#222" stroke-width="0.8"/><text y="3.5" font-size="9.5" font-weight="700" text-anchor="middle" font-family="Arial">${o.label}</text></g></g>`;
+      const me = o.label === "Siz";
+      const w = Math.max(16, o.label.length * 6.2 + 8);
+      s += `<g>${motion(o, false)}<g transform="translate(0,-19)"><rect x="${-w / 2 + 0.8}" y="-6" width="${w}" height="13" rx="6.5" fill="#000" opacity=".25"/><rect x="${-w / 2}" y="-7" width="${w}" height="13" rx="6.5" fill="${me ? "#e53935" : "#ffffff"}" stroke="#00000040" stroke-width=".6"/><text y="3" font-size="8.5" font-weight="800" text-anchor="middle" font-family="Arial" fill="${me ? "#fff" : "#1d1d1d"}">${o.label}</text></g></g>`;
     }
     return s;
   }
+  // --- Piyoda (yuqoridan: yelka + bosh), yurganda chayqaladi
   function person(o) {
-    return `<g><circle r="5.5" fill="#ff7043" stroke="#222" stroke-width="0.8"/><circle r="2.8" fill="#4e342e"/>${motion(o, false)}</g>`;
+    const c = o.color || "#ff7043";
+    return `<g>${motion(o, true)}<g><ellipse cx="1.5" cy="2" rx="4" ry="6.5" fill="#000" opacity=".22"/><ellipse rx="3.8" ry="6.2" fill="${c}" stroke="#00000055" stroke-width=".6"/><circle r="3.1" fill="#3e2723"/><animateTransform attributeName="transform" type="rotate" values="-8;8;-8" dur="0.7s" repeatCount="indefinite"/></g></g>`;
   }
   // --- Svetofor. state: green | red | yblink | g2y (yashildan sariqqa) | redarrow (qizil + o'ngga yashil strelka)
   function light(x, y, state) {
-    const c = (cy, col, anim = "") => `<circle cx="${x + 7}" cy="${y + cy}" r="4.6" fill="${col}">${anim}</circle>`;
+    const R = "#ff3b30", Y = "#ffcc00", G = "#34c759";
     const disc = (values, kt, dur = 4) => `<animate attributeName="fill" values="${values}" keyTimes="${kt}" dur="${dur}s" calcMode="discrete" repeatCount="indefinite"/>`;
-    let s = `<rect x="${x}" y="${y}" width="14" height="36" rx="3" fill="#111"/>`;
-    const R = "#e53935", Y = "#fbc02d", G = "#43a047";
-    if (state === "green") s += c(7, OFF) + c(18, OFF) + c(29, G);
-    if (state === "red") s += c(7, R) + c(18, OFF) + c(29, OFF);
-    if (state === "yblink") s += c(7, OFF) + c(18, Y, disc(`${Y};${OFF}`, "0;0.5", 1)) + c(29, OFF);
-    if (state === "g2y") s += c(7, OFF) + c(18, OFF, disc(`${OFF};${Y}`, "0;0.3")) + c(29, G, disc(`${G};${OFF}`, "0;0.3"));
+    const glowAnim = (values, kt, dur = 4) => `<animate attributeName="opacity" values="${values}" keyTimes="${kt}" dur="${dur}s" calcMode="discrete" repeatCount="indefinite"/>`;
+    const lens = (cy, col, anim = "", gAnim = "", lit = true) =>
+      `<circle cx="${x + 7}" cy="${y + cy}" r="8" fill="${col}" opacity="${lit ? 0.35 : 0}">${gAnim}</circle><circle cx="${x + 7}" cy="${y + cy}" r="4.6" fill="${col}">${anim}</circle><circle cx="${x + 5.6}" cy="${y + cy - 1.6}" r="1.3" fill="#fff" opacity=".45"/>`;
+    let s = `<ellipse cx="${x + 12}" cy="${y + 52}" rx="9" ry="2.5" fill="#000" opacity=".22"/><rect x="${x + 5.5}" y="${y + 36}" width="3" height="16" fill="#555b62"/>`;
+    s += `<rect x="${x}" y="${y}" width="14" height="36" rx="4" fill="url(#tlHouse)" stroke="#000" stroke-width=".6"/>`;
+    if (state === "green") s += lens(7, OFF, "", "", false) + lens(18, OFF, "", "", false) + lens(29, G);
+    if (state === "red") s += lens(7, R) + lens(18, OFF, "", "", false) + lens(29, OFF, "", "", false);
+    if (state === "yblink") s += lens(7, OFF, "", "", false) + lens(18, Y, disc(`${Y};${OFF}`, "0;0.5", 1), glowAnim("0.35;0", "0;0.5", 1)) + lens(29, OFF, "", "", false);
+    if (state === "g2y") s += lens(7, OFF, "", "", false) + lens(18, Y, disc(`${OFF};${Y}`, "0;0.3"), glowAnim("0;0.35", "0;0.3")) + lens(29, G, disc(`${G};${OFF}`, "0;0.3"), glowAnim("0.35;0", "0;0.3"));
     if (state === "redarrow") {
-      s += c(7, R) + c(18, OFF) + c(29, OFF);
-      s += `<rect x="${x + 14}" y="${y + 22}" width="14" height="14" rx="3" fill="#111"/><text x="${x + 21}" y="${y + 33}" font-size="12" font-weight="700" fill="${G}" text-anchor="middle" font-family="Arial">→</text>`;
+      s += lens(7, R) + lens(18, OFF, "", "", false) + lens(29, OFF, "", "", false);
+      s += `<rect x="${x + 14}" y="${y + 22}" width="15" height="14" rx="4" fill="url(#tlHouse)" stroke="#000" stroke-width=".6"/><circle cx="${x + 21.5}" cy="${y + 29}" r="7" fill="${G}" opacity=".3"/><text x="${x + 21.5}" y="${y + 33}" font-size="12" font-weight="900" fill="${G}" text-anchor="middle" font-family="Arial">→</text>`;
     }
     return s;
   }
-  function controller(x, y) { // qo'llari yon tomonga uzatilgan (ko'kragi janubga)
-    return `<g transform="translate(${x},${y})">
-      <line x1="-22" y1="0" x2="22" y2="0" stroke="#263238" stroke-width="4" stroke-linecap="round"/>
-      <rect x="22" y="-2" width="12" height="4" fill="#fff" stroke="#222" stroke-width=".6"/>
-      <ellipse rx="10" ry="6.5" fill="#37474f"/><circle r="4.5" fill="#ffcc80" stroke="#222" stroke-width=".6"/>
-      <polygon points="-3,6 3,6 0,11" fill="#fdd835"/></g>`;
+  function controller(x, y) { // tartibga soluvchi: qo'llari yon tomonga uzatilgan (ko'kragi janubga)
+    return `<g transform="translate(${x},${y})"><ellipse cx="3" cy="4" rx="24" ry="8" fill="#000" opacity=".2"/><line x1="-23" y1="0" x2="23" y2="0" stroke="#1e3a5f" stroke-width="4.5" stroke-linecap="round"/><circle cx="-23" cy="0" r="2.6" fill="#fff"/><circle cx="23" cy="0" r="2.6" fill="#fff"/><rect x="24" y="-1.6" width="13" height="3.2" rx="1" fill="#fff" stroke="#222" stroke-width=".5"/><rect x="27" y="-1.6" width="2.5" height="3.2" fill="#111"/><rect x="32" y="-1.6" width="2.5" height="3.2" fill="#111"/><ellipse rx="10" ry="6.8" fill="#264b74"/><ellipse rx="10" ry="6.8" fill="none" stroke="#c6ff00" stroke-width="1.4" stroke-dasharray="3 3"/><circle r="5" fill="#1b2f4a"/><circle r="3.4" fill="#f5f5f5"/><polygon points="-3,6.5 3,6.5 0,11" fill="#fdd835"/></g>`;
   }
   return { wrap, cross, straight, oneway3, zebra, sign, car, person, light, controller };
 })();

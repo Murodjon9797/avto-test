@@ -245,6 +245,36 @@
   .tabbar button.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
   .tabbar button.on .e3d, .tabbar button.on .e3d-f { filter: drop-shadow(0 4px 6px rgba(0,0,0,.2)); transform: translateY(-1px) scale(1.06); }
   .tabbar.hidden { display: none; }
+
+  /* ---------- Premium ---------- */
+  .pro.on { background: linear-gradient(135deg, #a78bfa, #6d28d9); color: #fff; box-shadow: 0 4px 12px -4px rgba(109,40,217,.6); }
+  .freechip { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; margin-left: 8px; padding: 6px 11px; border-radius: 99px; background: rgba(255,255,255,.14); font-size: 12px; font-weight: 700; }
+  .prem-card { display: flex; align-items: center; gap: 14px; width: 100%; border: 0; border-radius: 24px; padding: 14px 16px; margin-bottom: 12px; text-align: left; color: #fff;
+    background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #7c3aed 100%); box-shadow: 0 18px 36px -18px rgba(76,29,149,.8); position: relative; overflow: hidden; }
+  .prem-card::after { content: ""; position: absolute; width: 140px; height: 140px; right: -40px; top: -60px; border-radius: 50%; background: rgba(255,255,255,.12); }
+  .prem-card .art { font-size: 44px; }
+  .prem-card b { display: block; font-size: 15.5px; font-weight: 800; }
+  .prem-card small { opacity: .8; font-size: 12px; }
+  .prem-card .chev { background: rgba(255,255,255,.18); color: #fff; }
+  .feat { display: flex; align-items: center; gap: 12px; padding: 9px 2px; font-weight: 600; font-size: 14.5px; }
+  .feat i { font-style: normal; width: 26px; height: 26px; border-radius: 50%; background: var(--ok-soft); color: var(--brand); display: grid; place-items: center; font-size: 14px; font-weight: 900; flex: none; }
+  .price { text-align: center; padding: 6px 0 2px; }
+  .price b { display: block; font-size: 38px; font-weight: 800; letter-spacing: -.03em; background: linear-gradient(135deg, #7c3aed, #10a874); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .price small { color: var(--hint); font-weight: 600; }
+  .bank { position: relative; overflow: hidden; border-radius: 22px; padding: 18px; color: #fff; aspect-ratio: 1.586; max-height: 210px; width: 100%;
+    background: radial-gradient(120% 120% at 0% 0%, #1fbf86 0%, #0b5f45 45%, #062b20 100%); box-shadow: 0 20px 40px -18px rgba(6,43,32,.8); display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 12px; }
+  .bank::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.14) 50%, transparent 60%); animation: shine 4s ease-in-out infinite; }
+  @keyframes shine { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  .bank .chip { width: 40px; height: 30px; border-radius: 7px; background: linear-gradient(135deg, #f5d27a, #c9963b); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+  .bank .num { font-size: 21px; font-weight: 800; letter-spacing: .08em; font-variant-numeric: tabular-nums; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .bank .row2 { display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; opacity: .9; }
+  .bank .row2 b { display: block; font-size: 15px; letter-spacing: .04em; opacity: 1; }
+  .copy { border: 0; background: rgba(255,255,255,.2); color: #fff; border-radius: 12px; padding: 9px 12px; font-weight: 800; font-size: 13px; backdrop-filter: blur(6px); position: relative; z-index: 1; }
+  .steps { counter-reset: s; }
+  .steps div { display: flex; gap: 12px; padding: 8px 2px; font-size: 14px; font-weight: 600; align-items: flex-start; }
+  .steps div::before { counter-increment: s; content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--grad); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 800; flex: none; }
+  .note { text-align: center; color: var(--hint); font-size: 12.5px; margin: 10px 4px; }
+  .note.pending { color: #b45309; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -255,16 +285,17 @@
   <section id="overview" class="screen active">
     <div class="stagger">
       <div class="head">
-        <div class="who"><div class="avatar"><span id="avatar">AT</span></div><div><small id="hello">Xush kelibsiz</small><b>Imtihon<span class="pro">PRO</span></b></div></div>
+        <div class="who"><div class="avatar"><span id="avatar">AT</span></div><div><small id="hello">Xush kelibsiz</small><b>Imtihon<span class="pro" id="proBadge">PRO</span></b></div></div>
         <div class="streak" title="Ketma-ket kunlar"><span data-ic="fire"></span><span id="streak">0</span></div>
       </div>
       <div class="hero">
         <span class="tag">⚡ <span id="examInfo"></span></span>
         <h3>Imtihonga tayyormisiz?</h3>
         <p>Haqiqiy imtihon formatida o'zingizni sinab ko'ring</p>
-        <button class="cta press" data-action="exam">Sinovni boshlash <i>→</i></button>
+        <button class="cta press" data-action="exam">Sinovni boshlash <i>→</i></button><span class="freechip" id="freeChip"></span>
         <div class="art" data-ic="car"></div>
       </div>
+      <button class="prem-card press" data-action="paywall" id="premCard"><div class="art" data-ic="crown"></div><div><b>Premium'ga o'ting</b><small id="premCardSub"></small></div><span class="chev">›</span></button>
       <div class="card">
         <div class="ready">
           <div class="ring-lg" id="readyRing"></div>
@@ -307,6 +338,7 @@
           <button class="row press" data-action="random"><span class="ico" data-ic="die"></span><div><b>Tasodifiy savollar</b><small>Aralash 10 ta savol</small></div><span class="chev">›</span></button>
           <button class="row press" data-action="mistakes"><span class="ico" data-ic="pencil"></span><div><b>Xatolar ustida ishlash</b><small id="mistakesInfo"></small></div><span class="chev">›</span></button>
           <button class="row press" data-action="marathon"><span class="ico" data-ic="runner"></span><div><b>Marafon</b><small id="marathonInfo"></small></div><span class="chev">›</span></button>
+          <button class="row press" data-action="paywall"><span class="ico" data-ic="crown"></span><div><b>Premium</b><small id="premRowSub"></small></div><span class="chev">›</span></button>
         </div>
       </div>
     </div>
@@ -334,6 +366,36 @@
       <div class="toggle-row"><span>Savollarni aralashtirish</span><label class="switch"><input type="checkbox" id="optShuffle" checked><span></span></label></div>
     </div>
     <div class="sticky"><button class="btn press" id="topicStart">Boshlash →</button></div>
+  </section>
+
+  <!-- =================== PREMIUM / TO'LOV =================== -->
+  <section id="paywall" class="screen">
+    <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Premium</h2><small>Imtihon PRO</small></div><span></span></div>
+    <div class="showcase"><div class="art" data-ic="crown"></div><h1 id="pwTitle">Premium'ga o'ting</h1><small id="pwSub"></small></div>
+    <div class="card">
+      <div class="feat"><i>✓</i>400+ savolning barchasi</div>
+      <div class="feat"><i>✓</i>Cheksiz imtihon sinovlari va biletlar</div>
+      <div class="feat"><i>✓</i>30 ta animatsion yo'l vaziyati</div>
+      <div class="feat"><i>✓</i>Xatolar tahlili va shaxsiy statistika</div>
+      <div class="price"><b id="pwPrice"></b><small>Premium narxi</small></div>
+    </div>
+    <div id="pwPay">
+      <div class="label">To'lov kartasi</div>
+      <div class="bank">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1"><div class="chip"></div><button class="copy press" id="copyCard">Nusxalash</button></div>
+        <div class="num" id="pwCard" style="position:relative;z-index:1"></div>
+        <div class="row2" style="position:relative;z-index:1"><div>Karta egasi<b id="pwHolder"></b></div><div style="text-align:right">Summa<b id="pwPrice2"></b></div></div>
+      </div>
+      <div class="card steps">
+        <div><span>Kartaga <b id="pwPrice3"></b> o'tkazing</span></div>
+        <div><span>To'lov chekining skrinshotini botga yuboring</span></div>
+        <div><span>Admin tasdiqlagach Premium avtomatik ochiladi</span></div>
+      </div>
+      <div class="note" id="pwNote"></div>
+      <button class="btn light press" id="checkPrem">🔄 To'lov holatini tekshirish</button>
+    </div>
+    <div style="height:70px"></div>
+    <div class="sticky"><button class="btn press" id="sendReceipt">📤 Chekni botga yuborish</button></div>
   </section>
 
   <!-- =================== BILETLAR =================== -->
@@ -393,6 +455,16 @@
 // count — savollar soni, minutes — vaqt, maxErrors — ruxsat etilgan xatolar,
 // animated — imtihondagi animatsion savollar soni, stopOnFail — ruxsatdan ortiq xatoda imtihon to'xtaydi, dailyGoal — kunlik maqsad
 const EXAM = { count: 20, minutes: 25, maxErrors: 2, animated: 5, stopOnFail: true, dailyGoal: 20 };
+
+// ===== Premium sozlamalari =====
+const PREMIUM_CFG = {
+  freeLimit: 10,                                        // bepul savollar soni
+  price: "35 000 so'm",
+  card: "4073420059515035",
+  holder: "Murodjon H",
+  api: "https://imtihon-pro-bot.hacker-gentlemen1.workers.dev", // Cloudflare Worker
+  botLink: "https://t.me/imtihon_probot?start=premium",
+};
 
 // ===== 3D ikonkalar (Microsoft Fluent Emoji, MIT litsenziya). Yuklanmasa oddiy emoji ko'rsatiladi =====
 const FLUENT = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/";
@@ -491,10 +563,59 @@ const user = inTg && tg.initDataUnsafe && tg.initDataUnsafe.user;
 $("avatar").textContent = ((user ? (user.first_name || "")[0] + ((user.last_name || "")[0] || "") : "") || "IP").toUpperCase();
 $("hello").textContent = user ? `Salom, ${user.first_name} 👋` : "Xush kelibsiz 👋";
 
+// ===== Premium holati =====
+// Bepul foydalanuvchi PREMIUM_CFG.freeLimit ta savol yecha oladi. Premium holati serverda (Cloudflare D1)
+// saqlanadi va Telegram initData imzosi orqali tekshiriladi.
+let PREMIUM = store.get("avto_premium", false), PENDING = false;
+const freeUsed = () => store.get("avto_free_used", 0);
+const freeLeft = () => Math.max(0, PREMIUM_CFG.freeLimit - freeUsed());
+const locked = () => !PREMIUM && freeLeft() <= 0;
+async function refreshPremium(showResult) {
+  if (!inTg) return;
+  try {
+    const r = await fetch(PREMIUM_CFG.api + "/api/me", { headers: { "x-init-data": tg.initData } });
+    const d = await r.json();
+    if (d.ok) { PREMIUM = !!d.premium; PENDING = !!d.pending; store.set("avto_premium", PREMIUM); }
+  } catch (e) { /* tarmoq xatosi — saqlangan holat ishlatiladi */ }
+  applyPremiumUi();
+  if (showResult) alertMsg(PREMIUM ? "🎉 Premium faol! Barcha savollar ochiq." : PENDING ? "⏳ Chekingiz tekshirilmoqda. Tasdiqlangach xabar keladi." : "Hali to'lov topilmadi. Chekni botga yuboring.");
+  if (current === "paywall") renderPaywall();
+}
+function applyPremiumUi() {
+  $("proBadge").textContent = PREMIUM ? "PREMIUM" : "PRO";
+  $("proBadge").classList.toggle("on", PREMIUM);
+  $("freeChip").textContent = PREMIUM ? "💎 Premium faol" : `🎁 Bepul: ${freeLeft()}/${PREMIUM_CFG.freeLimit} savol`;
+  $("premCard").style.display = PREMIUM ? "none" : "";
+  $("premCardSub").textContent = `Barcha 400+ savol · ${PREMIUM_CFG.price}`;
+  $("premRowSub").textContent = PREMIUM ? "Faol ✓" : PREMIUM_CFG.price;
+}
+function renderPaywall() {
+  const pretty = PREMIUM_CFG.card.replace(/(\d{4})(?=\d)/g, "$1 ");
+  $("pwTitle").textContent = PREMIUM ? "Premium faol 💎" : "Premium'ga o'ting";
+  $("pwSub").textContent = PREMIUM ? "Barcha imkoniyatlar ochiq" : (freeLeft() ? `Bepul savollar: ${freeLeft()} ta qoldi` : `${PREMIUM_CFG.freeLimit} ta bepul savol tugadi`);
+  ["pwPrice", "pwPrice2", "pwPrice3"].forEach((id) => ($(id).textContent = PREMIUM_CFG.price));
+  $("pwCard").textContent = pretty; $("pwHolder").textContent = PREMIUM_CFG.holder;
+  $("pwPay").style.display = PREMIUM ? "none" : "";
+  $("sendReceipt").parentElement.style.display = PREMIUM ? "none" : "";
+  $("pwNote").className = "note" + (PENDING ? " pending" : "");
+  $("pwNote").textContent = PENDING ? "⏳ Chekingiz qabul qilingan va tekshirilmoqda" : "Chekni yuborganingizdan so'ng admin tez orada tasdiqlaydi";
+}
+$("copyCard").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(PREMIUM_CFG.card); }
+  catch (e) { const t = document.createElement("textarea"); t.value = PREMIUM_CFG.card; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (_) {} t.remove(); }
+  $("copyCard").textContent = "Nusxalandi ✓"; haptic("success");
+  setTimeout(() => ($("copyCard").textContent = "Nusxalash"), 1800);
+});
+$("sendReceipt").addEventListener("click", () => {
+  if (inTg && tg.openTelegramLink) { tg.openTelegramLink(PREMIUM_CFG.botLink); setTimeout(() => tg.close(), 300); }
+  else window.open(PREMIUM_CFG.botLink, "_blank");
+});
+$("checkPrem").addEventListener("click", () => refreshPremium(true));
+
 // ===== Navigatsiya =====
 const TABS = ["overview", "theory", "practice", "progress"];
 let current = "overview", hist = [], timerId = null, S = null, curTopic = null;
-const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic) };
+const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic), paywall: renderPaywall };
 function show(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
   current = id;
@@ -652,6 +773,7 @@ document.addEventListener("click", (e) => {
   const act = a.dataset.action;
   if (act === "exam") startQuiz(buildExam(), "exam", "Imtihon");
   if (act === "theory-tab") goTab("theory");
+  if (act === "paywall") open("paywall");
   if (act === "tickets") open("ticketsScreen");
   if (act === "anim") startQuiz(shuffle(byTopic("anim")), "train", "Vaziyatlar");
   if (act === "random") startQuiz(shuffle(QUESTIONS).slice(0, 10), "train", "Tasodifiy");
@@ -667,6 +789,7 @@ function alertMsg(text) { inTg && tg.showAlert ? tg.showAlert(text) : alert(text
 // ===== Test jarayoni =====
 function startQuiz(list, mode, title) {
   if (!list.length) return;
+  if (locked()) { open("paywall"); return; }          // bepul savollar tugagan
   S = { list, mode, title, i: 0, answers: [] };
   stopTimer();
   if (mode === "exam") { S.deadline = Date.now() + EXAM.minutes * 60000; tickTimer(); timerId = setInterval(tickTimer, 1000); $("timer").style.display = ""; }
@@ -736,10 +859,12 @@ $("qOptions").addEventListener("click", (e) => {
 });
 $("nextBtn").addEventListener("click", () => {
   if (S.stopped) finishQuiz(false);
+  else if (S.i < S.list.length - 1 && locked()) { stopTimer(); open("paywall"); }
   else if (S.i < S.list.length - 1) { S.i++; renderQuestion(); }
   else finishQuiz(false);
 });
 function saveAnswer(q, ok) {
+  if (!PREMIUM) { store.set("avto_free_used", freeUsed() + 1); applyPremiumUi(); }
   const st = getStats();
   st.answered++; if (ok) st.correct++;
   const t = st.topics[q.topic] || { a: 0, c: 0 };
@@ -824,7 +949,12 @@ function confetti() {
 }
 
 renderOverview();
+applyPremiumUi();
 fillIcons();
+refreshPremium();
+// "Kamroq harakat" sozlamasi: animatsion vaziyatlar oxirgi holatda to'xtatiladi (motion-foundations)
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (reduceMotion) new MutationObserver(() => { const s = document.querySelector("#qImg svg.scene"); if (s && !s.dataset.still) { s.dataset.still = 1; s.pauseAnimations(); s.setCurrentTime(2.4); } }).observe($("qImg"), { childList: true });
 </script>
 </body>
 </html>
