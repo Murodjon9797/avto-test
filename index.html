@@ -373,7 +373,7 @@
     <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Premium</h2><small>Imtihon PRO</small></div><span></span></div>
     <div class="showcase"><div class="art" data-ic="crown"></div><h1 id="pwTitle">Premium'ga o'ting</h1><small id="pwSub"></small></div>
     <div class="card">
-      <div class="feat"><i>✓</i>400+ savolning barchasi</div>
+      <div class="feat"><i>✓</i>1200 ta savolning barchasi</div>
       <div class="feat"><i>✓</i>Cheksiz imtihon sinovlari va biletlar</div>
       <div class="feat"><i>✓</i>30 ta animatsion yo'l vaziyati</div>
       <div class="feat"><i>✓</i>Xatolar tahlili va shaxsiy statistika</div>
@@ -449,6 +449,13 @@
 
 <script src="questions.js"></script>
 <script src="questions2.js"></script>
+<script src="q/a_general.js"></script>
+<script src="q/b_signals.js"></script>
+<script src="q/c_driving.js"></script>
+<script src="q/d_junctions.js"></script>
+<script src="q/e_conditions.js"></script>
+<script src="q/f_signs.js"></script>
+<script src="q/g_safety.js"></script>
 <script src="scenes.js"></script>
 <script>
 // ===== Sozlamalar =====
@@ -527,6 +534,12 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
 };
+// Savollar bazasi versiyasi: raqamlar o'zgarganda eski savol-statistikasi bir marta tozalanadi
+const DATA_VER = 2;
+if (store.get("avto_ver", 1) !== DATA_VER) {
+  ["avto_qstat", "avto_mistakes", "avto_tickets"].forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
+  store.set("avto_ver", DATA_VER);
+}
 const getMistakes = () => store.get("avto_mistakes", []);
 const getStats = () => store.get("avto_stats", { answered: 0, correct: 0, exams: 0, passed: 0, best: null, topics: {} });
 const getQS = () => store.get("avto_qstat", {});
@@ -586,7 +599,7 @@ function applyPremiumUi() {
   $("proBadge").classList.toggle("on", PREMIUM);
   $("freeChip").textContent = PREMIUM ? "💎 Premium faol" : `🎁 Bepul: ${freeLeft()}/${PREMIUM_CFG.freeLimit} savol`;
   $("premCard").style.display = PREMIUM ? "none" : "";
-  $("premCardSub").textContent = `Barcha 400+ savol · ${PREMIUM_CFG.price}`;
+  $("premCardSub").textContent = `Barcha 1200 ta savol · ${PREMIUM_CFG.price}`;
   $("premRowSub").textContent = PREMIUM ? "Faol ✓" : PREMIUM_CFG.price;
 }
 function renderPaywall() {

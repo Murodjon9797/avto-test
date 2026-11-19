@@ -179,8 +179,8 @@ const SCN = (() => {
   return { wrap, cross, straight, oneway3, zebra, sign, car, person, light, controller };
 })();
 
-// Animatsion savol qo'shish: id lar 1001 dan boshlanadi (tartibni o'zgartirmang)
-let SCENE_ID = 1000;
+// Animatsion savol qo'shish: id lar 5001 dan boshlanadi (tartibni o'zgartirmang)
+let SCENE_ID = 5000;
 function A(scene, q, options, explain) {
   QUESTIONS.push({ id: ++SCENE_ID, topic: "anim", scene: SCN.wrap(scene), q, options, answer: 0, explain });
 }
