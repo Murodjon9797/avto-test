@@ -264,6 +264,14 @@
   .catcard .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%); }
   .catcard .ph .lt { z-index: 1; top: auto; bottom: 8px; right: auto; left: 12px; color: #fff; font-size: 30px; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
   .catcard .body { padding: 10px 14px 14px; }
+  .pdfpage { width: 100%; aspect-ratio: 0.707; margin-bottom: 10px; background: #fff; border-radius: 6px; box-shadow: var(--shadow); overflow: hidden; }
+  .pdfpage canvas { width: 100%; height: 100%; display: block; }
+  /* Animatsion vaziyatlarda "Siz" transporti toifaga mos ko'rinadi */
+  .mev > g { display: none; } .mev > .v-car { display: inline; }
+  html[data-veh] .mev > g { display: none; }
+  html[data-veh="car"] .mev > .v-car, html[data-veh="moto"] .mev > .v-moto, html[data-veh="carT"] .mev > .v-carT,
+  html[data-veh="truck"] .mev > .v-truck, html[data-veh="truckT"] .mev > .v-truckT, html[data-veh="bus"] .mev > .v-bus,
+  html[data-veh="busA"] .mev > .v-busA { display: inline; }
   .chipph { width: 30px; height: 30px; border-radius: 50%; background-size: cover; background-position: center; box-shadow: 0 0 0 2px var(--card), 0 0 0 3.5px var(--brand-2); }
   .catcard .art { font-size: 58px; margin-bottom: 6px; }
   .catcard .lt { position: absolute; right: 14px; top: 12px; font-size: 30px; font-weight: 800; letter-spacing: -.03em; color: var(--brand); }
@@ -447,6 +455,17 @@
     <p class="muted" style="margin:-8px 4px 16px;font-size:13.5px">Yo'l harakatiga oid amaldagi rasmiy hujjatlar (manba: lex.uz). PDF ko'rinishida ochish yoki yuklab olish mumkin.</p>
     <div id="docList"></div>
     <div class="card" style="font-size:11.5px;color:var(--hint);line-height:1.5"><b style="color:var(--text);font-size:12.5px">Fotosuratlar</b><br><span id="photoCredits"></span></div>
+  </section>
+
+  <!-- =================== PDF KO'RUVCHI =================== -->
+  <section id="pdfScreen" class="screen">
+    <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2 id="pdfTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h2><small id="pdfInfo"></small></div><span></span></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn light press" id="pdfZoomOut" style="margin:0;padding:10px;width:52px;flex:none;font-size:18px">－</button>
+      <button class="btn light press" id="pdfZoomIn" style="margin:0;padding:10px;width:52px;flex:none;font-size:18px">＋</button>
+      <button class="btn press" id="pdfDl" style="margin:0;padding:10px;flex:1;font-size:14px;white-space:nowrap">⬇️ Yuklab olish</button>
+    </div>
+    <div style="overflow-x:auto;margin:0 -16px;padding:0 16px"><div id="pdfPages"></div></div>
   </section>
 
   <!-- =================== BILETLAR =================== -->
@@ -636,6 +655,7 @@ function applyCat(c) {
   TICKETS = null;
   const cc = CATS.find((x) => x.k === c);
   if (cc && $("catChip")) $("catChip").innerHTML = `<span class="chipph" style="background-image:url(img/cat/${c}.jpg)"></span>${c}`;
+  document.documentElement.dataset.veh = { A: "moto", B: "car", BE: "carT", C: "truck", CE: "truckT", D: "bus", DE: "busA" }[c] || "car";
   if ($("heroPhoto")) { $("heroPhoto").style.backgroundImage = `url(img/cat/${c}.jpg)`; $("hero").classList.add("has-photo"); }
 }
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -877,6 +897,50 @@ const PHOTO_CREDITS = [{"k": "A", "file": "Moscow, Voge CU625 (578cc) motorcycle
 function renderCredits() {
   $("photoCredits").innerHTML = PHOTO_CREDITS.map((c) => `${c.k}: <a href="${esc(c.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(c.file.replace(/\.jpg$/i, ""))}</a> — ${esc(c.author)}, ${esc(c.license)}`).join("<br>") + "<br>Manba: Wikimedia Commons";
 }
+// ===== Ilova ichidagi PDF ko'ruvchi (PDF.js, sahifalar ko'rinishga kelganda chiziladi) =====
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+let pdfLib = null, PDFDOC = null, PDFZOOM = 1, pdfObs = null;
+function loadPdfJs() {
+  if (pdfLib) return Promise.resolve(pdfLib);
+  return new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = PDFJS + "pdf.min.js";
+    s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; res((pdfLib = window.pdfjsLib)); };
+    s.onerror = rej; document.head.appendChild(s);
+  });
+}
+async function openDoc(doc) {
+  hist.push(current); PDFZOOM = 1;
+  $("pdfTitle").textContent = doc.title; $("pdfInfo").textContent = "Yuklanmoqda…"; $("pdfPages").innerHTML = "";
+  $("pdfDl").onclick = () => { const url = new URL(doc.file, location.href).href; if (inTg && tg.downloadFile) { try { tg.downloadFile({ url, file_name: doc.file.split("/").pop() }); return; } catch (e) {} } inTg && tg.openLink ? tg.openLink(url) : window.open(url, "_blank"); };
+  show("pdfScreen");
+  try {
+    const lib = await loadPdfJs();
+    PDFDOC = await lib.getDocument(doc.file).promise;
+    $("pdfInfo").textContent = `${PDFDOC.numPages} bet`;
+    buildPdfPages();
+  } catch (e) {
+    $("pdfInfo").textContent = "Xatolik";
+    $("pdfPages").innerHTML = `<div class="card" style="text-align:center">PDF ochilmadi. Internetni tekshiring yoki «Yuklab olish» tugmasidan foydalaning.</div>`;
+  }
+}
+function buildPdfPages() {
+  const box = $("pdfPages"); box.innerHTML = ""; box.style.width = PDFZOOM * 100 + "%";
+  if (pdfObs) pdfObs.disconnect();
+  pdfObs = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting && !e.target.dataset.done) { e.target.dataset.done = 1; renderPdfPage(e.target); } }), { rootMargin: "800px 0px" });
+  for (let i = 1; i <= PDFDOC.numPages; i++) { const d = document.createElement("div"); d.className = "pdfpage"; d.dataset.n = i; box.appendChild(d); pdfObs.observe(d); }
+}
+async function renderPdfPage(el) {
+  const page = await PDFDOC.getPage(Number(el.dataset.n));
+  const base = page.getViewport({ scale: 1 }), w = el.clientWidth;
+  const vp = page.getViewport({ scale: (w / base.width) * Math.min(window.devicePixelRatio || 1, 2) });
+  const c = document.createElement("canvas"); c.width = vp.width; c.height = vp.height;
+  el.style.aspectRatio = `${base.width} / ${base.height}`; el.innerHTML = ""; el.appendChild(c);
+  await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+}
+["pdfZoomIn", "pdfZoomOut"].forEach((id) => $(id).addEventListener("click", () => {
+  if (!PDFDOC) return;
+  PDFZOOM = Math.min(3, Math.max(1, PDFZOOM + (id === "pdfZoomIn" ? 0.5 : -0.5))); tick(); buildPdfPages();
+}));
 const DOC_IC = { law: "scale", money: "money", id: "idcard", car: "car", book: "page" };
 function renderDocs() {
   renderCredits();
@@ -891,6 +955,7 @@ document.addEventListener("click", (e) => {
   const o = e.target.closest("[data-doc-open]"), d = e.target.closest("[data-doc-dl]");
   if (!o && !d) return;
   const doc = DOCS[Number(o ? o.dataset.docOpen : d.dataset.docDl)];
+  if (o) { openDoc(doc); return; }                    // ilova ichida ochiladi
   const url = new URL(doc.file, location.href).href, name = doc.file.split("/").pop();
   if (d && inTg && tg.downloadFile) { try { tg.downloadFile({ url, file_name: name }); return; } catch (err) {} }
   if (inTg && tg.openLink) tg.openLink(url); else window.open(url, "_blank");

@@ -126,8 +126,57 @@ const SCN = (() => {
     s += `<rect x="${-L / 2 + 0.2}" y="${-H / 2 + 1.6}" width="1.7" height="3.2" rx=".6" fill="#7f1010"/><rect x="${-L / 2 + 0.2}" y="${H / 2 - 4.8}" width="1.7" height="3.2" rx=".6" fill="#7f1010"/>`;
     return s;
   }
+  // --- Yuk mashinasi (kabina + kuzov) yoki faqat kabina (shatakchi), oldi +x tomonda
+  function truckBody(color, L, H, cabOnly) {
+    const g = "tb" + ++uid, cabL = cabOnly ? L : 13;
+    let s = `<defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(color, -50)}"/><stop offset=".5" stop-color="${shade(color, 35)}"/><stop offset="1" stop-color="${shade(color, -50)}"/></linearGradient></defs>`;
+    s += `<rect x="${-L / 2 + 2}" y="${-H / 2 + 3}" width="${L}" height="${H}" rx="3" fill="#000" opacity=".3"/>`;
+    for (const x of [L / 2 - 5, -L / 2 + 6, -L / 2 + 12]) if (!cabOnly || x > 0) for (const y of [-H / 2 + 0.2, H / 2 - 0.2]) s += `<rect x="${x - 3.2}" y="${y - 1.7}" width="6.4" height="3.4" rx="1.2" fill="#0d0d0d"/>`;
+    if (!cabOnly) s += `<rect x="${-L / 2}" y="${-H / 2 - 0.5}" width="${L - cabL - 1}" height="${H + 1}" rx="1.5" fill="#dfe3e6" stroke="#8f979c" stroke-width=".6"/>` + Array.from({ length: Math.floor((L - cabL) / 6) }, (_, i) => `<line x1="${-L / 2 + 3 + i * 6}" y1="${-H / 2}" x2="${-L / 2 + 3 + i * 6}" y2="${H / 2}" stroke="#b9c0c4" stroke-width=".7"/>`).join("");
+    s += `<rect x="${L / 2 - cabL}" y="${-H / 2}" width="${cabL}" height="${H}" rx="3" fill="url(#${g})" stroke="${shade(color, -90)}" stroke-width=".6"/>`;
+    s += `<rect x="${L / 2 - 4.5}" y="${-H / 2 + 1.8}" width="3" height="${H - 3.6}" rx="1" fill="url(#glass)"/>`;
+    s += `<ellipse cx="${L / 2 - 1}" cy="${-H / 2 + 2.6}" rx="1.2" ry="1.8" fill="#fff7d1"/><ellipse cx="${L / 2 - 1}" cy="${H / 2 - 2.6}" rx="1.2" ry="1.8" fill="#fff7d1"/>`;
+    return s;
+  }
+  // --- Mototsikl (yuqoridan: g'ildiraklar, bak, o'rindiq, rul, shlemli haydovchi)
+  function motoBody(color) {
+    return `<ellipse cx="1" cy="2.5" rx="12" ry="4" fill="#000" opacity=".28"/><rect x="-12" y="-1.6" width="7" height="3.2" rx="1.5" fill="#0d0d0d"/><rect x="5" y="-1.4" width="7" height="2.8" rx="1.4" fill="#0d0d0d"/><ellipse cx="1" cy="0" rx="7.5" ry="3.3" fill="${color}" stroke="${shade(color, -90)}" stroke-width=".6"/><ellipse cx="2.5" cy="-1" rx="2.6" ry="1.1" fill="#fff" opacity=".28"/><line x1="6" y1="-6" x2="6" y2="6" stroke="#222" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="-2.5" cy="0" rx="2.8" ry="5.4" fill="#37474f"/><circle cx="-1.2" cy="0" r="3.3" fill="#fafafa" stroke="#555" stroke-width=".6"/><rect x="0.6" y="-1.6" width="1.4" height="3.2" rx=".6" fill="#263238"/><circle cx="11" cy="0" r="1.4" fill="#fff7d1"/>`;
+  }
+  // --- Tormoz chiroqlari va burilish ko'rsatkichlari (old va orqa nuqtalarga ko'ra)
+  function extras(o, front, rear, H) {
+    let b = "";
+    const dur = o.dur || 4;
+    if (!o.loop && !o.keyPoints && !o.reverse) {
+      const h = o.hold || 0.55;
+      b += `<g opacity="0"><circle cx="${rear}" cy="${-H / 2 + 3.2}" r="3.6" fill="#ff2d20" opacity=".75"/><circle cx="${rear}" cy="${H / 2 - 3.2}" r="3.6" fill="#ff2d20" opacity=".75"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;${(h * 0.55).toFixed(3)};${h};1" dur="${dur}s" repeatCount="indefinite"/></g>`;
+    }
+    const lamp = (x, y) => `<g><circle cx="${x}" cy="${y}" r="4.2" fill="#ffb300" opacity=".45"/><circle cx="${x}" cy="${y}" r="2.2" fill="#ffd54f"/><animate attributeName="opacity" values="1;0" dur="0.8s" calcMode="discrete" repeatCount="indefinite"/></g>`;
+    const fl = front - 1.5, rl = rear + 1.5, top = -H / 2 + 1.2, bot = H / 2 - 1.2;
+    if (o.blink === "L" || o.blink === "H") b += lamp(fl, top) + lamp(rl, top);
+    if (o.blink === "R" || o.blink === "H") b += lamp(fl, bot) + lamp(rl, bot);
+    return b;
+  }
+  // --- "Siz" transporti: barcha toifa variantlari; ko'rinadigani html[data-veh] ga qarab tanlanadi.
+  //     Har bir variantning OLDI oddiy avtomobil oldi turgan joyda qoladi (to'xtash nuqtalari o'zgarmaydi).
+  function meVariants(o) {
+    const c = o.color || "#e53935";
+    const trailer = (x0, len, H, col) => `<rect x="${x0 - len + 2}" y="${-H / 2 + 3}" width="${len}" height="${H}" rx="2" fill="#000" opacity=".28"/><rect x="${x0 - len}" y="${-H / 2}" width="${len}" height="${H}" rx="2" fill="${col}" stroke="#7a8288" stroke-width=".6"/>` + [x0 - len + 5, x0 - len + 11].map((x) => `<rect x="${x - 3}" y="${-H / 2 - 1.2}" width="6" height="2.4" rx="1" fill="#0d0d0d"/><rect x="${x - 3}" y="${H / 2 - 1.2}" width="6" height="2.4" rx="1" fill="#0d0d0d"/>`).join("");
+    const v = {
+      car: body("car", c, 28, 14) + extras(o, 14, -14, 14),
+      moto: `<g transform="translate(3,0)">${motoBody(c)}${extras(o, 11, -11, 7)}</g>`,
+      carT: body("car", c, 28, 14) + `<line x1="-14" y1="0" x2="-19" y2="0" stroke="#333" stroke-width="1.6"/>` + trailer(-19, 20, 13, "#cfd5da") + extras(o, 14, -39, 13),
+      truck: `<g transform="translate(-6,0)">${truckBody(c, 40, 16)}${extras(o, 20, -20, 16)}</g>`,
+      truckT: `<g transform="translate(6,0)">${truckBody(c, 16, 16, true)}<line x1="-8" y1="0" x2="-10" y2="0" stroke="#333" stroke-width="2"/>${trailer(-9, 46, 17, "#e3e7ea")}${extras(o, 8, -55, 17)}</g>`,
+      bus: `<g transform="translate(-8,0)">${body("bus", c, 44, 16)}${extras(o, 22, -22, 16)}</g>`,
+      busA: `<g transform="translate(-1,0)">${body("bus", c, 30, 16)}<rect x="-19" y="-7" width="4" height="14" rx="1" fill="#455a64"/><g transform="translate(-31,0)">${body("bus", c, 24, 16)}</g>${extras(o, 15, -43, 16)}</g>`,
+    };
+    return `<g class="mev">${Object.entries(v).map(([k, s]) => `<g class="v-${k}">${s}</g>`).join("")}</g>`;
+  }
   function car(o) {
     const kind = o.kind || "car";
+    if (o.label === "Siz" && kind === "car" && !o.siren) {
+      return `<g>${meVariants(o)}${motion(o, true)}</g><g>${motion(o, false)}<g transform="translate(0,-19)"><rect x="-11.2" y="-6" width="24" height="13" rx="6.5" fill="#000" opacity=".25"/><rect x="-12" y="-7" width="24" height="13" rx="6.5" fill="#e53935" stroke="#00000040" stroke-width=".6"/><text y="3" font-size="8.5" font-weight="800" text-anchor="middle" font-family="Arial" fill="#fff">Siz</text></g></g>`;
+    }
     const L = kind === "bus" ? 44 : kind === "tram" ? 52 : 28, H = kind === "car" ? 14 : 16;
     let b = body(kind, o.color || "#1e88e5", L, H);
     const dur = o.dur || 4;
