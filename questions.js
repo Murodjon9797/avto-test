@@ -59,4 +59,19 @@ function Q(topic, q, options, explain, img) {
   QUESTIONS.push({ id: QUESTIONS.length + 1, topic, q, options, answer: 0, explain, img });
 }
 
+// Toifaga xos savol: QC(["C","CE"], mavzu, savol, [TO'G'RI, ...], izoh, rasm).
+// cats bo'lmagan savollar barcha toifalar uchun umumiy hisoblanadi.
+// id lar 20001 dan boshlanadi — umumiy savollar raqamlariga ta'sir qilmaydi.
+let CAT_ID = 20000;
+function QC(cats, topic, q, options, explain, img) {
+  QUESTIONS.push({ id: ++CAT_ID, cats, topic, q, options, answer: 0, explain, img });
+}
+Object.assign(TOPICS, {
+  catA: "A toifasi: mototsikllar",
+  catB: "B toifasi: yengil avtomobillar",
+  catC: "C toifasi: yuk avtomobillari",
+  catD: "D toifasi: avtobuslar",
+  catE: "BE, CE, DE: tirkamalar va avtopoyezdlar",
+});
+
 // Savollar q/*.js fayllarida (mavzular bo'yicha).

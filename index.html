@@ -239,12 +239,35 @@
   .tabbar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom)); width: calc(100% - 28px); max-width: 492px; z-index: 5;
     background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-radius: 26px; box-shadow: 0 1px 0 var(--border) inset, 0 16px 40px -12px rgba(0,0,0,.25); border: 1px solid var(--border);
-    display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px; }
+    display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px; }
   .tabbar button { border: 0; background: none; border-radius: 20px; padding: 7px 2px 6px; font-size: 11px; font-weight: 700; color: var(--hint); transition: background .25s, color .25s; }
   .tabbar .e3d, .tabbar .e3d-f { display: block; margin: 0 auto 2px; font-size: 24px; filter: grayscale(1) opacity(.55); transition: .25s; }
   .tabbar button.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
   .tabbar button.on .e3d, .tabbar button.on .e3d-f { filter: drop-shadow(0 4px 6px rgba(0,0,0,.2)); transform: translateY(-1px) scale(1.06); }
   .tabbar.hidden { display: none; }
+  .tabbar button { font-size: 10.5px; }
+
+  /* ---------- Toifalar ---------- */
+  .catchip { display: flex; align-items: center; gap: 6px; border: 0; padding: 6px 12px 6px 6px; border-radius: 99px; background: var(--card); box-shadow: var(--shadow); font-weight: 800; font-size: 14px; }
+  .catchip .e3d { font-size: 24px; }
+  .catgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .catcard { position: relative; overflow: hidden; border: 0; background: var(--card); border-radius: 24px; padding: 16px 14px; box-shadow: var(--shadow); text-align: left; }
+  .catcard .art { font-size: 58px; margin-bottom: 6px; }
+  .catcard .lt { position: absolute; right: 14px; top: 12px; font-size: 30px; font-weight: 800; letter-spacing: -.03em; color: var(--brand); }
+  .catcard b { display: block; font-size: 14px; font-weight: 800; line-height: 1.25; }
+  .catcard small { display: block; color: var(--hint); font-size: 12px; margin-top: 4px; }
+  .catcard.on { box-shadow: inset 0 0 0 2.5px var(--brand-2), var(--shadow); }
+
+  /* ---------- Hujjatlar ---------- */
+  .doc { display: flex; gap: 14px; background: var(--card); border-radius: 22px; padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  .doc .art { width: 60px; height: 60px; border-radius: 18px; background: var(--card2); display: grid; place-items: center; font-size: 36px; flex: none; }
+  .doc .info { flex: 1; min-width: 0; }
+  .doc b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.01em; line-height: 1.25; }
+  .doc small { display: block; color: var(--hint); font-size: 12px; margin-top: 3px; }
+  .doc .tag { display: inline-block; margin-top: 7px; padding: 3px 9px; border-radius: 99px; background: var(--ok-soft); color: var(--brand); font-size: 11px; font-weight: 700; }
+  .doc .acts { display: flex; gap: 8px; margin-top: 10px; }
+  .doc .acts button { flex: 1; border: 0; border-radius: 12px; padding: 10px 6px; font-weight: 800; font-size: 13px; background: var(--card2); }
+  .doc .acts button.main { background: var(--grad); color: #fff; }
 
   /* ---------- Premium ---------- */
   .pro.on { background: linear-gradient(135deg, #a78bfa, #6d28d9); color: #fff; box-shadow: 0 4px 12px -4px rgba(109,40,217,.6); }
@@ -286,7 +309,7 @@
     <div class="stagger">
       <div class="head">
         <div class="who"><div class="avatar"><span id="avatar">AT</span></div><div><small id="hello">Xush kelibsiz</small><b>Imtihon<span class="pro" id="proBadge">PRO</span></b></div></div>
-        <div class="streak" title="Ketma-ket kunlar"><span data-ic="fire"></span><span id="streak">0</span></div>
+        <div style="display:flex;gap:8px;align-items:center"><button class="catchip press" data-action="cats" id="catChip"></button><div class="streak" title="Ketma-ket kunlar"><span data-ic="fire"></span><span id="streak">0</span></div></div>
       </div>
       <div class="hero">
         <span class="tag">⚡ <span id="examInfo"></span></span>
@@ -398,6 +421,20 @@
     <div class="sticky"><button class="btn press" id="sendReceipt">📤 Chekni botga yuborish</button></div>
   </section>
 
+  <!-- =================== TOIFA TANLASH =================== -->
+  <section id="catScreen" class="screen">
+    <div class="nav"><button class="circle-btn press" data-back id="catBack">‹</button><div><h2>Toifani tanlang</h2><small>Haydovchilik guvohnomasi toifasi</small></div><span></span></div>
+    <p class="muted" style="margin:0 4px 14px;font-size:13.5px">Savollar tanlangan toifaga moslab beriladi: umumiy qoidalar va shu toifaga xos savollar. Toifani keyin istalgan vaqtda o'zgartirishingiz mumkin.</p>
+    <div class="catgrid" id="catGrid"></div>
+  </section>
+
+  <!-- =================== HUJJATLAR =================== -->
+  <section id="docs" class="screen">
+    <h1 class="big-title">Hujjatlar</h1>
+    <p class="muted" style="margin:-8px 4px 16px;font-size:13.5px">Yo'l harakatiga oid amaldagi rasmiy hujjatlar (manba: lex.uz). PDF ko'rinishida ochish yoki yuklab olish mumkin.</p>
+    <div id="docList"></div>
+  </section>
+
   <!-- =================== BILETLAR =================== -->
   <section id="ticketsScreen" class="screen">
     <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Biletlar</h2><small>Har birida 20 savol</small></div><span></span></div>
@@ -445,6 +482,7 @@
   <button data-tab="theory"><span data-ic="openbook"></span>Nazariya</button>
   <button data-tab="practice"><span data-ic="target"></span>Mashq</button>
   <button data-tab="progress"><span data-ic="chart"></span>Natijalar</button>
+  <button data-tab="docs"><span data-ic="scroll"></span>Hujjatlar</button>
 </nav>
 
 <script src="questions.js"></script>
@@ -461,6 +499,12 @@
 <script src="scenes/s2_lights.js"></script>
 <script src="scenes/s3_maneuvers.js"></script>
 <script src="scenes/s4_special.js"></script>
+<script src="q/cat_a.js"></script>
+<script src="q/cat_b.js"></script>
+<script src="q/cat_c.js"></script>
+<script src="q/cat_d.js"></script>
+<script src="q/cat_e.js"></script>
+<script src="docs/docs.js"></script>
 <script>
 // ===== Sozlamalar =====
 // count — savollar soni, minutes — vaqt, maxErrors — ruxsat etilgan xatolar,
@@ -496,6 +540,12 @@ const ICONS = {
   target: ["Bullseye/3D/bullseye_3d.png", "🎯"], openbook: ["Open book/3D/open_book_3d.png", "📖"], wavy: ["Wavy dash/3D/wavy_dash_3d.png", "〰️"],
   fire: ["Fire/3D/fire_3d.png", "🔥"], crown: ["Crown/3D/crown_3d.png", "👑"], sparkles: ["Sparkles/3D/sparkles_3d.png", "✨"],
   rocket: ["Rocket/3D/rocket_3d.png", "🚀"], brain: ["Brain/3D/brain_3d.png", "🧠"],
+  moto: ["Motorcycle/3D/motorcycle_3d.png", "🏍️"], pickup: ["Pickup truck/3D/pickup_truck_3d.png", "🛻"],
+  truck: ["Delivery truck/3D/delivery_truck_3d.png", "🚚"], lorry: ["Articulated lorry/3D/articulated_lorry_3d.png", "🚛"],
+  bus2: ["Oncoming bus/3D/oncoming_bus_3d.png", "🚍"], trolley: ["Trolleybus/3D/trolleybus_3d.png", "🚎"],
+  scroll: ["Scroll/3D/scroll_3d.png", "📜"], page: ["Page facing up/3D/page_facing_up_3d.png", "📄"],
+  scale: ["Balance scale/3D/balance_scale_3d.png", "⚖️"], money: ["Money with wings/3D/money_with_wings_3d.png", "💸"],
+  idcard: ["Identification card/3D/identification_card_3d.png", "🪪"],
 };
 const ic = (k) => { const [p, e] = ICONS[k] || ["", "📄"]; return p ? `<img class="e3d" src="${FLUENT}${encodeURI(p)}" alt="${e}" decoding="async">` : `<span class="e3d-f">${e}</span>`; };
 document.addEventListener("error", (e) => {
@@ -517,6 +567,9 @@ const TOPIC_META = {
   pedestrians: ["walking", "Piyoda va yo'lovchi majburiyatlari"], markings: ["wavy", "Yaxlit, uzuq va sariq chiziqlar"],
   idsigns: ["beginner", "Boshlovchi, o'quv, kar haydovchi"], cargo: ["package", "Yuk o'lchamlari va mahkamlash"],
   bikes: ["bike", "Velosiped, moped, arava"],
+  catA: ["moto", "Mototsikl haydovchilari uchun"], catB: ["car", "Yengil avtomobil haydovchilari uchun"],
+  catC: ["truck", "Yuk avtomobili haydovchilari uchun"], catD: ["bus2", "Avtobus haydovchilari uchun"],
+  catE: ["lorry", "Tirkama va avtopoyezdlar"],
 };
 Object.keys(TOPICS).forEach((t) => { if (!TOPIC_META[t]) TOPIC_META[t] = ["", ""]; });
 const tname = (t) => TOPICS[t].replace(/^🎬 /, "");
@@ -547,6 +600,29 @@ if (store.get("avto_ver", 1) !== DATA_VER) {
 const getMistakes = () => store.get("avto_mistakes", []);
 const getStats = () => store.get("avto_stats", { answered: 0, correct: 0, exams: 0, passed: 0, best: null, topics: {} });
 const getQS = () => store.get("avto_qstat", {});
+
+// ===== Haydovchilik toifalari =====
+// Umumiy savollar (cats yo'q) barcha toifalarga, QC() bilan yozilganlar faqat o'z toifasiga beriladi.
+const CATS = [
+  { k: "A", ic: "moto", d: "Mototsikl va elektr mototsikllar" },
+  { k: "B", ic: "car", d: "Yengil avtomobillar (3,5 t gacha, 8 o'rindiqgacha)" },
+  { k: "BE", ic: "pickup", d: "«B» toifadagi avtomobil + tirkama" },
+  { k: "C", ic: "truck", d: "Yuk avtomobillari (3,5 t dan ortiq)" },
+  { k: "CE", ic: "lorry", d: "«C» toifadagi avtomobil + tirkama" },
+  { k: "D", ic: "bus2", d: "Avtobuslar (8 o'rindiqdan ortiq)" },
+  { k: "DE", ic: "trolley", d: "«D» + tirkama, bo'g'imli avtobuslar" },
+];
+const ALLQ = QUESTIONS.slice();
+let CAT = store.get("avto_cat", null);
+const tkKey = () => "avto_tickets_" + (CAT || "all");
+const visTopics = () => Object.keys(TOPICS).filter((t) => byTopic(t).length);
+function applyCat(c) {
+  CAT = c;
+  QUESTIONS.splice(0, QUESTIONS.length, ...ALLQ.filter((q) => !q.cats || q.cats.includes(c)));
+  TICKETS = null;
+  const cc = CATS.find((x) => x.k === c);
+  if (cc && $("catChip")) $("catChip").innerHTML = ic(cc.ic) + c;
+}
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
 function streakDays() {
   const days = store.get("avto_days", {}); let n = 0; const d = new Date();
@@ -630,9 +706,9 @@ $("sendReceipt").addEventListener("click", () => {
 $("checkPrem").addEventListener("click", () => refreshPremium(true));
 
 // ===== Navigatsiya =====
-const TABS = ["overview", "theory", "practice", "progress"];
+const TABS = ["overview", "theory", "practice", "progress", "docs"];
 let current = "overview", hist = [], timerId = null, S = null, curTopic = null;
-const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic), paywall: renderPaywall };
+const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic), paywall: renderPaywall, docs: renderDocs, catScreen: renderCats };
 function show(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
   current = id;
@@ -646,6 +722,7 @@ function show(id) {
 function goTab(id) { if (id !== current) tick(); hist = []; RENDER[id](); show(id); }
 function open(id) { hist.push(current); if (RENDER[id]) RENDER[id](); show(id); }
 function back() {
+  if (current === "catScreen" && !CAT) return;           // toifa tanlanmaguncha chiqib bo'lmaydi
   if (current === "quiz" && S && S.answers.length) {
     const leave = () => { stopTimer(); doBack(); };
     if (inTg && tg.showConfirm) tg.showConfirm("Testdan chiqasizmi? Natija saqlanmaydi.", (ok) => ok && leave());
@@ -668,11 +745,11 @@ function renderOverview() {
   $("todayN").textContent = today; $("goalN").textContent = EXAM.dailyGoal;
   $("todayBar").style.width = Math.min(100, pct(today, EXAM.dailyGoal)) + "%";
   $("streak").textContent = streakDays();
-  const tres = store.get("avto_tickets", {});
+  const tres = store.get(tkKey(), {});
   $("overviewStats").innerHTML = [
     ["trophy", `${st.passed}/${st.exams}`, "Imtihon"], ["ticket", `${Object.values(tres).filter((r) => r.passed).length}/${getTickets().length}`, "Biletlar"], ["pencil", getMistakes().length, "Xatolar"],
   ].map(([i, v, l]) => `<div class="mini">${ic(i)}<b>${v}</b><small>${l}</small></div>`).join("");
-  const weak = Object.keys(TOPICS).map((t) => ({ t, p: pct(mastered(byTopic(t), qs), byTopic(t).length) }))
+  const weak = visTopics().map((t) => ({ t, p: pct(mastered(byTopic(t), qs), byTopic(t).length) }))
     .filter((x) => x.p < 100).sort((a, b) => a.p - b.p).slice(0, 3);
   $("suggest").innerHTML = weak.map(({ t }) => topicCard(t, qs)).join("") || `<div class="card" style="text-align:center">${ic("party")} Barcha mavzular o'zlashtirilgan!</div>`;
 }
@@ -686,9 +763,9 @@ function topicCard(t, qs) {
 function renderTheory() {
   const qs = getQS();
   $("theoryRing").innerHTML = ring(pct(mastered(QUESTIONS, qs), QUESTIONS.length), 44, 4);
-  $("theoryStats").innerHTML = [[Object.keys(TOPICS).length, "Mavzu"], [QUESTIONS.length, "Savol"], [getTickets().length, "Bilet"], [byTopic("anim").length, "Animatsiya"]]
+  $("theoryStats").innerHTML = [[visTopics().length, "Mavzu"], [QUESTIONS.length, "Savol"], [getTickets().length, "Bilet"], [byTopic("anim").length, "Animatsiya"]]
     .map(([v, l]) => `<div class="st"><small>${l}</small><b>${v}</b></div>`).join("");
-  $("topicList").innerHTML = Object.keys(TOPICS).map((t) => topicCard(t, qs)).join("");
+  $("topicList").innerHTML = visTopics().map((t) => topicCard(t, qs)).join("");
 }
 
 // ===== Mashq =====
@@ -698,7 +775,7 @@ function renderPractice() {
   $("thMeta").textContent = `${a}/${theory.length}`; $("thBar").style.width = pct(a, theory.length) + "%";
   $("anMeta").textContent = `${b}/${anim.length}`; $("anBar").style.width = pct(b, anim.length) + "%";
   $("examInfo2").textContent = examLine();
-  const res = store.get("avto_tickets", {});
+  const res = store.get(tkKey(), {});
   $("ticketsInfo").textContent = `${getTickets().length} ta bilet · ${Object.values(res).filter((r) => r.passed).length} tasi o'tilgan`;
   const m = getMistakes().length;
   $("mistakesInfo").textContent = m ? `${m} ta savolni takrorlang` : "Hozircha xato yo'q";
@@ -739,13 +816,13 @@ function renderProgress() {
   $("histChart").innerHTML = h.length
     ? h.map((x) => `<div><span>${x.c}</span><i class="${x.ok ? "" : "fail"}" style="height:${Math.max(4, (x.c / x.t) * 100)}%"></i></div>`).join("")
     : `<div style="justify-content:center;font-size:13px">Hali imtihon topshirilmagan</div>`;
-  $("topicAcc").innerHTML = Object.keys(TOPICS).map((t) => {
+  $("topicAcc").innerHTML = visTopics().map((t) => {
     const s = st.topics[t], p = s ? pct(s.c, s.a) : 0;
     return `<div class="acc">${ic(TOPIC_META[t][0])}<div>${esc(tname(t))}<div class="bar"><i style="width:${p}%;${p < 70 && s ? "background:linear-gradient(90deg,#f7c86a,#e89b2f)" : ""}"></i></div></div><b>${s ? p + "%" : "—"}</b></div>`;
   }).join("");
 }
 $("resetBtn").addEventListener("click", () => {
-  const doReset = () => { ["avto_stats", "avto_mistakes", "avto_tickets", "avto_qstat", "avto_days", "avto_history"].forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} }); renderProgress(); };
+  const doReset = () => { ["avto_stats", "avto_mistakes", "avto_qstat", "avto_days", "avto_history"].concat(CATS.map((c) => "avto_tickets_" + c.k)).forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} }); renderProgress(); };
   if (inTg && tg.showConfirm) tg.showConfirm("Barcha natijalar o'chirilsinmi?", (ok) => ok && doReset());
   else if (confirm("Barcha natijalar o'chirilsinmi?")) doReset();
 });
@@ -769,8 +846,36 @@ function getTickets() {
   for (const t of TICKETS) while (t.length < EXAM.count && k < rest.length) t.push(rest[k++]);
   return TICKETS;
 }
+function renderCats() {
+  $("catBack").style.visibility = CAT ? "visible" : "hidden";
+  $("catGrid").innerHTML = CATS.map((c) => {
+    const n = ALLQ.filter((q) => !q.cats || q.cats.includes(c.k)).length;
+    return `<button class="catcard press ${c.k === CAT ? "on" : ""}" data-cat="${c.k}"><span class="lt">${c.k}</span><div class="art">${ic(c.ic)}</div><b>${esc(c.d)}</b><small>${n} ta savol</small></button>`;
+  }).join("");
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  store.set("avto_cat", b.dataset.cat); applyCat(b.dataset.cat); haptic("success"); goTab("overview");
+});
+const DOC_IC = { law: "scale", money: "money", id: "idcard", car: "car", book: "page" };
+function renderDocs() {
+  const list = typeof DOCS !== "undefined" ? DOCS : [];
+  $("docList").innerHTML = list.length ? list.map((d, i) => `<div class="doc"><span class="art">${ic(DOC_IC[d.icon] || "page")}</span>
+    <div class="info"><b>${esc(d.title)}</b><small>${esc(d.subtitle || "")}</small>
+    <span class="tag">Amaldagi tahrir: ${esc(d.asOf || "")}</span><small>${d.pages ? d.pages + " bet · " : ""}${d.sizeMB ? d.sizeMB + " MB · " : ""}PDF</small>
+    <div class="acts"><button class="main press" data-doc-open="${i}">📖 Ochish</button><button class="press" data-doc-dl="${i}">⬇️ Yuklab olish</button></div></div></div>`).join("")
+    : `<div class="card" style="text-align:center">Hujjatlar tez orada qo'shiladi</div>`;
+}
+document.addEventListener("click", (e) => {
+  const o = e.target.closest("[data-doc-open]"), d = e.target.closest("[data-doc-dl]");
+  if (!o && !d) return;
+  const doc = DOCS[Number(o ? o.dataset.docOpen : d.dataset.docDl)];
+  const url = new URL(doc.file, location.href).href, name = doc.file.split("/").pop();
+  if (d && inTg && tg.downloadFile) { try { tg.downloadFile({ url, file_name: name }); return; } catch (err) {} }
+  if (inTg && tg.openLink) tg.openLink(url); else window.open(url, "_blank");
+});
 function renderTickets() {
-  const res = store.get("avto_tickets", {});
+  const res = store.get(tkKey(), {});
   $("ticketsGrid").innerHTML = getTickets().map((t, i) => {
     const r = res[i + 1];
     return `<button class="ticket press ${r ? (r.passed ? "ok" : "bad") : ""}" data-ticket="${i}">${i + 1}<small>${r ? r.correct + "/" + r.total : "—"}</small></button>`;
@@ -791,6 +896,7 @@ document.addEventListener("click", (e) => {
   if (act === "exam") startQuiz(buildExam(), "exam", "Imtihon");
   if (act === "theory-tab") goTab("theory");
   if (act === "paywall") open("paywall");
+  if (act === "cats") open("catScreen");
   if (act === "tickets") open("ticketsScreen");
   if (act === "anim") startQuiz(shuffle(byTopic("anim")), "train", "Vaziyatlar");
   if (act === "random") startQuiz(shuffle(QUESTIONS).slice(0, 10), "train", "Tasodifiy");
@@ -907,7 +1013,7 @@ function finishQuiz(timeUp) {
     store.set("avto_stats", st);
     const h = store.get("avto_history", []); h.push({ c: correct, t: total, ok: passed, d: Date.now() }); store.set("avto_history", h.slice(-30));
   }
-  if (S.mode === "ticket" && S.ticket) { const res = store.get("avto_tickets", {}); res[S.ticket] = { correct, total, passed }; store.set("avto_tickets", res); }
+  if (S.mode === "ticket" && S.ticket) { const res = store.get(tkKey(), {}); res[S.ticket] = { correct, total, passed }; store.set(tkKey(), res); }
 
   const p = pct(correct, total), mark = strict ? pct(total - EXAM.maxErrors, total) : 100;
   $("rIcon").className = "result-art" + (passed ? "" : " fail");
@@ -965,8 +1071,10 @@ function confetti() {
   })(t0);
 }
 
+if (CAT) applyCat(CAT);
 renderOverview();
 applyPremiumUi();
+if (!CAT) { renderCats(); show("catScreen"); }
 fillIcons();
 refreshPremium();
 // "Kamroq harakat" sozlamasi: animatsion vaziyatlar oxirgi holatda to'xtatiladi (motion-foundations)
