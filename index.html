@@ -79,6 +79,14 @@
   .hero h3 { margin: 12px 0 6px; font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -.03em; max-width: 62%; }
   .hero p { margin: 0 0 16px; opacity: .78; font-size: 13px; max-width: 60%; }
   .hero .art { position: absolute; right: -6px; top: 24px; font-size: 128px; animation: float 4s ease-in-out infinite; }
+  .hero { min-height: 196px; }
+  .hero .photo { position: absolute; inset: 0; z-index: -3; background-size: cover; background-position: 72% center; transform: scale(1.04); animation: kenburns 18s ease-in-out infinite alternate; }
+  @keyframes kenburns { to { transform: scale(1.12) translateX(-8px); } }
+  .hero .shade { position: absolute; inset: 0; z-index: -2; background:
+      linear-gradient(90deg, rgba(4,34,24,.97) 0%, rgba(4,34,24,.86) 40%, rgba(4,34,24,.35) 72%, rgba(4,34,24,.08) 100%),
+      linear-gradient(0deg, rgba(4,34,24,.6) 0%, transparent 45%); }
+  .hero.has-photo::before, .hero.has-photo::after { display: none; }
+  @media (prefers-reduced-motion: reduce) { .hero .photo { animation: none; } }
   .hero .art .e3d { filter: drop-shadow(0 18px 22px rgba(0,0,0,.45)); }
   @keyframes float { 50% { transform: translateY(-8px) rotate(-2deg); } }
   .cta { display: inline-flex; align-items: center; gap: 10px; border: 0; background: #fff; color: #0b3b2c; font-weight: 800; border-radius: 16px; padding: 13px 18px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.5); }
@@ -251,7 +259,12 @@
   .catchip { display: flex; align-items: center; gap: 6px; border: 0; padding: 6px 12px 6px 6px; border-radius: 99px; background: var(--card); box-shadow: var(--shadow); font-weight: 800; font-size: 14px; }
   .catchip .e3d { font-size: 24px; }
   .catgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .catcard { position: relative; overflow: hidden; border: 0; background: var(--card); border-radius: 24px; padding: 16px 14px; box-shadow: var(--shadow); text-align: left; }
+  .catcard { position: relative; overflow: hidden; border: 0; background: var(--card); border-radius: 24px; padding: 0; box-shadow: var(--shadow); text-align: left; }
+  .catcard .ph { position: relative; aspect-ratio: 16 / 10; background-size: cover; background-position: center; }
+  .catcard .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%); }
+  .catcard .ph .lt { z-index: 1; top: auto; bottom: 8px; right: auto; left: 12px; color: #fff; font-size: 30px; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .catcard .body { padding: 10px 14px 14px; }
+  .chipph { width: 30px; height: 30px; border-radius: 50%; background-size: cover; background-position: center; box-shadow: 0 0 0 2px var(--card), 0 0 0 3.5px var(--brand-2); }
   .catcard .art { font-size: 58px; margin-bottom: 6px; }
   .catcard .lt { position: absolute; right: 14px; top: 12px; font-size: 30px; font-weight: 800; letter-spacing: -.03em; color: var(--brand); }
   .catcard b { display: block; font-size: 14px; font-weight: 800; line-height: 1.25; }
@@ -311,12 +324,12 @@
         <div class="who"><div class="avatar"><span id="avatar">AT</span></div><div><small id="hello">Xush kelibsiz</small><b>Imtihon<span class="pro" id="proBadge">PRO</span></b></div></div>
         <div style="display:flex;gap:8px;align-items:center"><button class="catchip press" data-action="cats" id="catChip"></button><div class="streak" title="Ketma-ket kunlar"><span data-ic="fire"></span><span id="streak">0</span></div></div>
       </div>
-      <div class="hero">
+      <div class="hero" id="hero">
         <span class="tag">⚡ <span id="examInfo"></span></span>
         <h3>Imtihonga tayyormisiz?</h3>
         <p>Haqiqiy imtihon formatida o'zingizni sinab ko'ring</p>
         <button class="cta press" data-action="exam">Sinovni boshlash <i>→</i></button><span class="freechip" id="freeChip"></span>
-        <div class="art" data-ic="car"></div>
+        <div class="photo" id="heroPhoto"></div><div class="shade"></div>
       </div>
       <button class="prem-card press" data-action="paywall" id="premCard"><div class="art" data-ic="crown"></div><div><b>Premium'ga o'ting</b><small id="premCardSub"></small></div><span class="chev">›</span></button>
       <div class="card">
@@ -396,7 +409,7 @@
     <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Premium</h2><small>Imtihon PRO</small></div><span></span></div>
     <div class="showcase"><div class="art" data-ic="crown"></div><h1 id="pwTitle">Premium'ga o'ting</h1><small id="pwSub"></small></div>
     <div class="card">
-      <div class="feat"><i>✓</i>1370 ta savolning barchasi</div>
+      <div class="feat"><i>✓</i>Tanlangan toifadagi barcha savollar (1500+)</div>
       <div class="feat"><i>✓</i>Cheksiz imtihon sinovlari va biletlar</div>
       <div class="feat"><i>✓</i>200 ta animatsion yo'l vaziyati</div>
       <div class="feat"><i>✓</i>Xatolar tahlili va shaxsiy statistika</div>
@@ -433,6 +446,7 @@
     <h1 class="big-title">Hujjatlar</h1>
     <p class="muted" style="margin:-8px 4px 16px;font-size:13.5px">Yo'l harakatiga oid amaldagi rasmiy hujjatlar (manba: lex.uz). PDF ko'rinishida ochish yoki yuklab olish mumkin.</p>
     <div id="docList"></div>
+    <div class="card" style="font-size:11.5px;color:var(--hint);line-height:1.5"><b style="color:var(--text);font-size:12.5px">Fotosuratlar</b><br><span id="photoCredits"></span></div>
   </section>
 
   <!-- =================== BILETLAR =================== -->
@@ -621,7 +635,8 @@ function applyCat(c) {
   QUESTIONS.splice(0, QUESTIONS.length, ...ALLQ.filter((q) => !q.cats || q.cats.includes(c)));
   TICKETS = null;
   const cc = CATS.find((x) => x.k === c);
-  if (cc && $("catChip")) $("catChip").innerHTML = ic(cc.ic) + c;
+  if (cc && $("catChip")) $("catChip").innerHTML = `<span class="chipph" style="background-image:url(img/cat/${c}.jpg)"></span>${c}`;
+  if ($("heroPhoto")) { $("heroPhoto").style.backgroundImage = `url(img/cat/${c}.jpg)`; $("hero").classList.add("has-photo"); }
 }
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
 function streakDays() {
@@ -653,7 +668,8 @@ function countUp(el, to, suffix = "", ms = 900) {
 }
 
 const user = inTg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-$("avatar").textContent = ((user ? (user.first_name || "")[0] + ((user.last_name || "")[0] || "") : "") || "IP").toUpperCase();
+const firstCh = (x) => (Array.from((x || "").normalize("NFKC").replace(/[^\p{L}\p{N}]/gu, ""))[0] || "");
+$("avatar").textContent = ((user ? firstCh(user.first_name) + firstCh(user.last_name) : "") || "IP").toUpperCase();
 $("hello").textContent = user ? `Salom, ${user.first_name} 👋` : "Xush kelibsiz 👋";
 
 // ===== Premium holati =====
@@ -679,7 +695,7 @@ function applyPremiumUi() {
   $("proBadge").classList.toggle("on", PREMIUM);
   $("freeChip").textContent = PREMIUM ? "💎 Premium faol" : `🎁 Bepul: ${freeLeft()}/${PREMIUM_CFG.freeLimit} savol`;
   $("premCard").style.display = PREMIUM ? "none" : "";
-  $("premCardSub").textContent = `Barcha 1370 ta savol · ${PREMIUM_CFG.price}`;
+  $("premCardSub").textContent = `Barcha ${QUESTIONS.length} ta savol · ${PREMIUM_CFG.price}`;
   $("premRowSub").textContent = PREMIUM ? "Faol ✓" : PREMIUM_CFG.price;
 }
 function renderPaywall() {
@@ -850,15 +866,20 @@ function renderCats() {
   $("catBack").style.visibility = CAT ? "visible" : "hidden";
   $("catGrid").innerHTML = CATS.map((c) => {
     const n = ALLQ.filter((q) => !q.cats || q.cats.includes(c.k)).length;
-    return `<button class="catcard press ${c.k === CAT ? "on" : ""}" data-cat="${c.k}"><span class="lt">${c.k}</span><div class="art">${ic(c.ic)}</div><b>${esc(c.d)}</b><small>${n} ta savol</small></button>`;
+    return `<button class="catcard press ${c.k === CAT ? "on" : ""}" data-cat="${c.k}"><div class="ph" style="background-image:url(img/cat/${c.k}.jpg)"><span class="lt">${c.k}</span></div><div class="body"><b>${esc(c.d)}</b><small>${n} ta savol</small></div></button>`;
   }).join("");
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-cat]"); if (!b) return;
   store.set("avto_cat", b.dataset.cat); applyCat(b.dataset.cat); haptic("success"); goTab("overview");
 });
+const PHOTO_CREDITS = [{"k": "A", "file": "Moscow, Voge CU625 (578cc) motorcycle, June 2026 04.jpg", "author": "Retired electrician", "license": "CC0", "url": "https://commons.wikimedia.org/wiki/File:Moscow,_Voge_CU625_(578cc)_motorcycle,_June_2026_04.jpg"}, {"k": "B", "file": "2019 Chevrolet Cobalt 1.8 LTZ facelift (front).jpg", "author": "Just a Man", "license": "CC BY 4.0", "url": "https://commons.wikimedia.org/wiki/File:2019_Chevrolet_Cobalt_1.8_LTZ_facelift_(front).jpg"}, {"k": "BE", "file": "Mercedes-Benz Sprinter and car trailer.jpg", "author": "Cjp24", "license": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Sprinter_and_car_trailer.jpg"}, {"k": "C", "file": "KamAZ-6520 dump truck in Moscow.jpg", "author": "Dmitry Ivanov..", "license": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:KamAZ-6520_dump_truck_in_Moscow.jpg"}, {"k": "CE", "file": "BL52393 (21.06.28, Motorvej 501, Viby J)DSC 8374-Enhanced-NRLR - Flickr - Lav Ulv.jpg", "author": "Lav Ulv", "license": "CC BY 4.0", "url": "https://commons.wikimedia.org/wiki/File:BL52393_(21.06.28,_Motorvej_501,_Viby_J)DSC_8374-Enhanced-NRLR_-_Flickr_-_Lav_Ulv.jpg"}, {"k": "D", "file": "Isuzu HC-40. Tashkent, Farhod str. 01.jpg", "author": "Jamshid Nurkulov", "license": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Isuzu_HC-40._Tashkent,_Farhod_str._01.jpg"}, {"k": "DE", "file": "Green bus in Tashkent.jpg", "author": "Humoyun Mehridinov", "license": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Green_bus_in_Tashkent.jpg"}];
+function renderCredits() {
+  $("photoCredits").innerHTML = PHOTO_CREDITS.map((c) => `${c.k}: <a href="${esc(c.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(c.file.replace(/\.jpg$/i, ""))}</a> — ${esc(c.author)}, ${esc(c.license)}`).join("<br>") + "<br>Manba: Wikimedia Commons";
+}
 const DOC_IC = { law: "scale", money: "money", id: "idcard", car: "car", book: "page" };
 function renderDocs() {
+  renderCredits();
   const list = typeof DOCS !== "undefined" ? DOCS : [];
   $("docList").innerHTML = list.length ? list.map((d, i) => `<div class="doc"><span class="art">${ic(DOC_IC[d.icon] || "page")}</span>
     <div class="info"><b>${esc(d.title)}</b><small>${esc(d.subtitle || "")}</small>
