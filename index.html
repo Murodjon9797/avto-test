@@ -319,6 +319,40 @@
   .steps div::before { counter-increment: s; content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--grad); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 800; flex: none; }
   .note { text-align: center; color: var(--hint); font-size: 12.5px; margin: 10px 4px; }
   .note.pending { color: #b45309; font-weight: 700; }
+
+  /* ---------- Darslar ---------- */
+  .lesson-card { position: relative; }
+  .lesson-card .art .e3d { font-size: 36px; }
+  .lesson-card .num { position: absolute; left: 14px; top: 10px; font-size: 11px; font-weight: 800; color: var(--hint); }
+  .lesson-card .info small { white-space: normal; display: block; }
+  .lesson-card.locked { box-shadow: none; background: var(--card2); }
+  .lesson-card.locked .art, .lesson-card.locked .info { opacity: .6; }
+  .lockrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; }
+  .pill-mini { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; background: var(--gold); color: #3b2200; font-size: 10.5px; font-weight: 800; letter-spacing: .03em; }
+  .pill-mini.free { background: var(--ok-soft); color: var(--brand); }
+  .pill-mini .e3d, .pill-mini .e3d-f { font-size: 13px; }
+  .readbar { height: 5px; border-radius: 99px; background: var(--card2); overflow: hidden; margin: 0 2px 14px; }
+  .readbar i { display: block; height: 100%; border-radius: 99px; background: var(--grad); transition: width .3s; }
+  .lesson { background: var(--card); border-radius: 26px; padding: 20px 18px; box-shadow: var(--shadow); margin-bottom: 12px; font-size: 14.5px; line-height: 1.6; }
+  .lesson h3 { font-size: 17px; font-weight: 800; letter-spacing: -.02em; margin: 20px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .lesson h3::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--brand-2); flex: none; }
+  .lesson h3:first-child { margin-top: 0; }
+  .lesson p { margin: 0 0 10px; color: var(--text); }
+  .lesson ul, .lesson ol { margin: 0 0 12px; padding-left: 20px; }
+  .lesson li { margin-bottom: 7px; }
+  .lesson li::marker { color: var(--brand); font-weight: 800; }
+  .lesson b { font-weight: 800; }
+  .lesson .tip, .lesson .warn { display: flex; gap: 10px; padding: 12px 14px; border-radius: 18px; margin: 12px 0; font-size: 13.5px; line-height: 1.5; }
+  .lesson .tip { background: rgba(18,176,124,.09); }
+  .lesson .warn { background: rgba(239,77,86,.09); }
+  .lesson .tip .e3d, .lesson .warn .e3d, .lesson .tip .e3d-f, .lesson .warn .e3d-f { font-size: 22px; flex: none; }
+  .lesson .signs { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0; padding: 14px; border-radius: 18px; background: var(--card2); }
+  .lesson .signs .sg { width: 64px; height: 64px; }
+  .lesson .signs .sg svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.12)); }
+  .lesson table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 13px; }
+  .lesson th, .lesson td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+  .lesson th { color: var(--hint); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; border-bottom: 1.5px solid var(--line); }
+  .lesson tr:last-child td { border-bottom: 0; }
 </style>
 </head>
 <body>
@@ -359,10 +393,9 @@
     </div>
   </section>
 
-  <!-- =================== NAZARIYA =================== -->
+  <!-- =================== MAVZULAR (Testlar ichidan) =================== -->
   <section id="theory" class="screen">
-    <div class="nav"><span></span><div><h2>Nazariya</h2><small>YHQ bo'limlari</small></div><div class="ring" id="theoryRing"></div></div>
-    <div class="stats4" id="theoryStats"></div>
+    <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Mavzular</h2><small>YHQ bo'limlari bo'yicha mashq</small></div><span></span></div>
     <div id="topicList" class="stagger"></div>
   </section>
 
@@ -371,7 +404,7 @@
     <div class="stagger">
       <h1 class="big-title">Mashq</h1>
       <div class="tiles">
-        <button class="tile press" data-action="theory-tab"><div class="art" data-ic="books"></div><b>Nazariya</b><div class="meta"><span>Savollar</span><span id="thMeta"></span></div><div class="bar"><i id="thBar"></i></div></button>
+        <button class="tile press" data-action="topics"><div class="art" data-ic="books"></div><b>Mavzular</b><div class="meta"><span>Savollar</span><span id="thMeta"></span></div><div class="bar"><i id="thBar"></i></div></button>
         <button class="tile press" data-action="anim"><div class="art" data-ic="clapper"></div><b>Vaziyatlar</b><div class="meta"><span>Animatsiya</span><span id="anMeta"></span></div><div class="bar"><i id="anBar"></i></div></button>
       </div>
       <button class="wide press" data-action="exam"><div class="art" data-ic="memo"></div><div><b>Imtihon sinovi</b><small id="examInfo2"></small></div><span class="chev">›</span></button>
@@ -399,6 +432,26 @@
     </div>
   </section>
 
+  <!-- =================== DARSLAR =================== -->
+  <section id="lessons" class="screen">
+    <div class="stagger">
+      <div class="nav"><span></span><div><h2>Darslar</h2><small>22 ta dars · YHQ asosida</small></div><div class="ring" id="lessonsRing"></div></div>
+      <div class="stats4" id="lessonStats"></div>
+      <div id="lessonCat"></div>
+      <div id="lessonList"></div>
+    </div>
+  </section>
+
+  <!-- =================== DARS =================== -->
+  <section id="lessonScreen" class="screen">
+    <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2 id="lsTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h2><small id="lsSub"></small></div><span class="pill" id="lsProg"></span></div>
+    <div class="readbar"><i id="lsBar"></i></div>
+    <div id="lsBody"></div>
+    <button class="btn light press" id="lsDone">O'qidim</button>
+    <button class="btn press" id="lsTest">🎯 Shu mavzudan test</button>
+    <div style="height:80px"></div>
+  </section>
+
   <!-- =================== MAVZU =================== -->
   <section id="topicScreen" class="screen">
     <div class="nav"><button class="circle-btn press" data-back>‹</button><div><h2>Mashq</h2><small>Test sozlamalari</small></div><div class="ring" id="topicRing"></div></div>
@@ -421,6 +474,7 @@
       <div class="feat"><i>✓</i>Cheksiz imtihon sinovlari va biletlar</div>
       <div class="feat"><i>✓</i>200 ta animatsion yo'l vaziyati</div>
       <div class="feat"><i>✓</i>Xatolar tahlili va shaxsiy statistika</div>
+      <div class="feat"><i>✓</i>22 ta dars — barcha mavzular bo'yicha darslik (3 tasi bepul)</div>
       <div class="price"><b id="pwPrice"></b><small>Premium narxi</small></div>
     </div>
     <div id="pwPay">
@@ -512,8 +566,8 @@
 
 <nav class="tabbar" id="tabbar">
   <button data-tab="overview" class="on"><span data-ic="house"></span>Asosiy</button>
-  <button data-tab="theory"><span data-ic="openbook"></span>Nazariya</button>
-  <button data-tab="practice"><span data-ic="target"></span>Mashq</button>
+  <button data-tab="lessons"><span data-ic="openbook"></span>Darslar</button>
+  <button data-tab="practice"><span data-ic="target"></span>Testlar</button>
   <button data-tab="progress"><span data-ic="chart"></span>Natijalar</button>
   <button data-tab="docs"><span data-ic="scroll"></span>Hujjatlar</button>
 </nav>
@@ -538,6 +592,7 @@
 <script src="q/cat_d.js"></script>
 <script src="q/cat_e.js"></script>
 <script src="docs/docs.js"></script>
+<script src="lessons.js"></script>
 <script>
 // ===== Sozlamalar =====
 // count — savollar soni, minutes — vaqt, maxErrors — ruxsat etilgan xatolar,
@@ -545,6 +600,7 @@
 const EXAM = { count: 20, minutes: 25, maxErrors: 2, animated: 10, stopOnFail: true, dailyGoal: 20 };
 
 // ===== Premium sozlamalari =====
+const FREE_LESSONS = 3;                                 // bepul darslar soni (darslik boshidan)
 const PREMIUM_CFG = {
   freeLimit: 10,                                        // bepul savollar soni
   price: "35 000 so'm",
@@ -578,7 +634,7 @@ const ICONS = {
   bus2: ["Oncoming bus/3D/oncoming_bus_3d.png", "🚍"], trolley: ["Trolleybus/3D/trolleybus_3d.png", "🚎"],
   scroll: ["Scroll/3D/scroll_3d.png", "📜"], page: ["Page facing up/3D/page_facing_up_3d.png", "📄"],
   scale: ["Balance scale/3D/balance_scale_3d.png", "⚖️"], money: ["Money with wings/3D/money_with_wings_3d.png", "💸"],
-  idcard: ["Identification card/3D/identification_card_3d.png", "🪪"],
+  idcard: ["Identification card/3D/identification_card_3d.png", "🪪"], lock: ["Locked/3D/locked_3d.png", "🔒"],
 };
 const ic = (k) => { const [p, e] = ICONS[k] || ["", "📄"]; return p ? `<img class="e3d" src="${FLUENT}${encodeURI(p)}" alt="${e}" decoding="async">` : `<span class="e3d-f">${e}</span>`; };
 document.addEventListener("error", (e) => {
@@ -604,7 +660,9 @@ const TOPIC_META = {
   catC: ["truck", "Yuk avtomobili haydovchilari uchun"], catD: ["bus2", "Avtobus haydovchilari uchun"],
   catE: ["lorry", "Tirkama va avtopoyezdlar"],
 };
-Object.keys(TOPICS).forEach((t) => { if (!TOPIC_META[t]) TOPIC_META[t] = ["", ""]; });
+const LESSON_IC = { terms: "openbook", idsigns: "beginner" };
+const lessonIc = (k) => LESSON_IC[k] || TOPIC_META[k][0];
+Object.keys(TOPICS).forEach((t) => { if (!TOPIC_META[t]) TOPIC_META[t] = [lessonIc(t), ""]; });
 const tname = (t) => TOPICS[t].replace(/^🎬 /, "");
 
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -742,9 +800,9 @@ $("sendReceipt").addEventListener("click", () => {
 $("checkPrem").addEventListener("click", () => refreshPremium(true));
 
 // ===== Navigatsiya =====
-const TABS = ["overview", "theory", "practice", "progress", "docs"];
+const TABS = ["overview", "lessons", "practice", "progress", "docs"];
 let current = "overview", hist = [], timerId = null, S = null, curTopic = null;
-const RENDER = { overview: renderOverview, theory: renderTheory, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic), paywall: renderPaywall, docs: renderDocs, catScreen: renderCats };
+const RENDER = { overview: renderOverview, lessons: renderLessons, lessonScreen: renderLessonScreen, practice: renderPractice, progress: renderProgress, ticketsScreen: renderTickets, topicScreen: () => renderTopic(curTopic), paywall: renderPaywall, docs: renderDocs, catScreen: renderCats, theory: renderTopics };
 function show(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
   current = id;
@@ -796,11 +854,9 @@ function topicCard(t, qs) {
   return `<button class="topic press" data-topic="${t}"><span class="art">${ic(TOPIC_META[t][0])}</span><span class="info"><b>${esc(tname(t))}</b><small>${esc(TOPIC_META[t][1])}</small>
     <span class="pr ${p === 100 ? "done" : ""}"><span class="bar"><i style="width:${p}%"></i></span>${p === 100 ? "✓ Tayyor" : `${done}/${list.length}`}</span></span><span class="chev">›</span></button>`;
 }
-function renderTheory() {
+// ===== Mavzular (Testlar → Mavzular) =====
+function renderTopics() {
   const qs = getQS();
-  $("theoryRing").innerHTML = ring(pct(mastered(QUESTIONS, qs), QUESTIONS.length), 44, 4);
-  $("theoryStats").innerHTML = [[visTopics().length, "Mavzu"], [QUESTIONS.length, "Savol"], [getTickets().length, "Bilet"], [byTopic("anim").length, "Animatsiya"]]
-    .map(([v, l]) => `<div class="st"><small>${l}</small><b>${v}</b></div>`).join("");
   $("topicList").innerHTML = visTopics().map((t) => topicCard(t, qs)).join("");
 }
 
@@ -841,6 +897,83 @@ $("topicStart").addEventListener("click", () => {
     if (!list.length) { alertMsg("Bu mavzuda xato qilingan savollar yo'q 👍"); return; }
   }
   startQuiz($("optShuffle").checked ? shuffle(list) : list, "train", tname(curTopic));
+});
+
+// ===== Darslar =====
+const LREAD = "avto_lessons_read", LVER = 1;
+if (store.get("avto_lessons_ver", 0) !== LVER) { try { localStorage.removeItem(LREAD); } catch (e) {} store.set("avto_lessons_ver", LVER); }
+const getRead = () => store.get(LREAD, []);
+const isRead = (k) => getRead().includes(k);
+const lessonLocked = (i) => !PREMIUM && i >= FREE_LESSONS;
+let curLesson = null;
+function markRead(k) { if (isRead(k)) return; const l = getRead(); l.push(k); store.set(LREAD, l); }
+function blockHtml(b) {
+  if (b.h) return `<h3>${b.h}</h3>`;
+  if (b.p) return `<p>${b.p}</p>`;
+  if (b.ul) return `<ul>${b.ul.map((x) => `<li>${x}</li>`).join("")}</ul>`;
+  if (b.ol) return `<ol>${b.ol.map((x) => `<li>${x}</li>`).join("")}</ol>`;
+  if (b.tip) return `<div class="tip">${ic("bulb")}<div>${b.tip}</div></div>`;
+  if (b.warn) return `<div class="warn">${ic("warning")}<div>${b.warn}</div></div>`;
+  if (b.signs) return `<div class="signs">${b.signs.filter((s) => SIGNS[s]).map((s) => `<div class="sg">${SIGNS[s]}</div>`).join("")}</div>`;
+  if (b.table) {
+    const [head, ...rows] = b.table;
+    return `<table><thead><tr>${head.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  return "";
+}
+function renderLessons() {
+  const read = getRead(), p = pct(read.length, LESSONS.length);
+  $("lessonsRing").innerHTML = ring(p, 44, 4);
+  $("lessonStats").innerHTML = [[LESSONS.length, "Dars"], [read.length, "O'qilgan"], [PREMIUM ? "∞" : FREE_LESSONS, "Bepul"], [PREMIUM ? "Faol" : "Yo'q", "Premium"]]
+    .map(([v, l]) => `<div class="st"><small>${l}</small><b>${v}</b></div>`).join("");
+  $("lessonCat").innerHTML = "";
+  $("lessonList").innerHTML = LESSONS.map((ls, i) => {
+    const lk = lessonLocked(i), rd = isRead(ls.k);
+    const badge = lk ? `<span class="pill-mini">${ic("lock")}PREMIUM</span>` : rd ? `<span class="pill-mini free">O'QILGAN ✓</span>` : i < FREE_LESSONS ? `<span class="pill-mini free">BEPUL</span>` : `<span class="pill-mini free">OCHIQ</span>`;
+    return `<button class="topic press lesson-card ${lk ? "locked" : ""}" data-lesson="${i}"><span class="num">${i + 1}</span><span class="art">${ic(lessonIc(ls.k))}</span>
+      <span class="info"><b>${esc(ls.title)}</b><small>${esc(ls.sub)}</small>
+      <span class="lockrow">${badge}<span style="color:var(--hint);font-size:11.5px;font-weight:700">${ls.minutes} daq</span></span></span>${lk ? "" : `<span class="chev">›</span>`}</button>`;
+  }).join("");
+}
+function renderLesson() {
+  const i = curLesson, ls = LESSONS[i];
+  if (!ls || lessonLocked(i)) { open("paywall"); return; }
+  $("lsTitle").textContent = `${i + 1}. ${ls.title}`;
+  $("lsSub").textContent = ls.sub;
+  $("lsProg").textContent = `${i + 1} / ${LESSONS.length}`;
+  $("lsBar").style.width = pct(i + 1, LESSONS.length) + "%";
+  $("lsBody").innerHTML = `<div class="lesson">${ls.blocks.map(blockHtml).join("")}</div>`;
+  const done = isRead(ls.k);
+  const btn = $("lsDone");
+  btn.textContent = done ? "✓ O'qilgan" : "O'qidim";
+  btn.disabled = done;
+  $("lsTest").textContent = `🎯 «${tname(ls.k)}» mavzusidan test`;
+  fillIcons($("lessonScreen"));
+}
+function renderLessonScreen() { renderLesson(); }
+function openLesson(k) {
+  const i = LESSONS.findIndex((l) => l.k === k);
+  if (i < 0) { open("lessons"); return; }
+  curLesson = i;                                       // renderLesson LESSONS[curLesson] (indeks) bilan ishlaydi
+  if (lessonLocked(i)) { hist.push("lessons"); open("paywall"); return; }
+  open("lessonScreen");
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-lesson]");
+  if (!b) return;
+  tick(); openLesson(LESSONS[Number(b.dataset.lesson)].k);
+});
+$("lsDone").addEventListener("click", () => {
+  const ls = LESSONS[curLesson];
+  if (!ls) return;
+  markRead(ls.k); haptic("success"); renderLesson(); renderLessons();
+});
+$("lsTest").addEventListener("click", () => {
+  const ls = LESSONS[curLesson];
+  if (!ls) return;
+  const list = byTopic(ls.k);
+  if (!list.length) { alertMsg("Bu mavzuda hozircha savollar yo'q"); return; }
+  startQuiz(shuffle(list), "train", tname(ls.k));
 });
 
 // ===== Natijalar =====
@@ -980,7 +1113,7 @@ document.addEventListener("click", (e) => {
   tick();
   const act = a.dataset.action;
   if (act === "exam") startQuiz(buildExam(), "exam", "Imtihon");
-  if (act === "theory-tab") goTab("theory");
+  if (act === "theory-tab" || act === "topics") open("theory");
   if (act === "paywall") open("paywall");
   if (act === "cats") open("catScreen");
   if (act === "tickets") open("ticketsScreen");
